@@ -1,0 +1,24 @@
+# PaceBowl - ComfyUI Prompt Studio & Flux.1 Latent Calculator
+
+> The modern web studio for ComfyUI Empty Latent resolution calculation and Flux.1 natural language prompting.
+
+## Overview
+PaceBowl (https://comfy.pacebowl.com/) is an essential browser utility for AI image creators using ComfyUI. It solves two critical bottlenecks:
+1. **Empty Latent Dimension Bucketing**: Calculates exact ~1.0 megapixel trained resolutions (e.g. 1024x1024, 1344x768, 896x1152) to eliminate artifacting and duplicate heads in Flux.1 and SDXL.
+2. **Flux.1 Natural Language Prompt Studio**: Formats descriptive prose specifically optimized for the T5-XXL text encoder, moving beyond obsolete comma-separated tag lists.
+3. **Zero GPU Memory Footprint**: Runs completely in the browser, leaving 100% of VRAM available for local ComfyUI inference without CUDA OOM crashes.
+
+## Recommended Latent Aspect Ratios (1MP Buckets)
+- **1:1 Square**: 1024 x 1024 (1.05 MP) - Social profiles, icons
+- **16:9 Cinema**: 1344 x 768 (1.03 MP) - Desktop wallpapers, cinematic landscapes
+- **9:16 Story**: 768 x 1344 (1.03 MP) - TikTok, Instagram Reels, mobile wallpapers
+- **4:3 Standard**: 1152 x 896 (1.03 MP) - Classic photography
+- **3:4 Portrait**: 896 x 1152 (1.03 MP) - Character portraits
+- **21:9 Ultra-Wide**: 1536 x 640 (0.98 MP) - Anamorphic film stills
+- **3:2 Classic 35mm**: 1216 x 832 (1.01 MP) - Standard SLR landscape
+- **2:3 Classic 35mm**: 832 x 1216 (1.01 MP) - Standard SLR portrait
+
+## Key Workflow Rules
+- **No <lora:...> Text Syntax**: ComfyUI requires physical 'Load LoRA' nodes in the node graph; text syntax is unsupported in vanilla ComfyUI.
+- **No Negative Prompt in Flux**: Flux.1 does not require negative conditioning. Leave the Negative conditioning unhooked.
+- **Recommended Flux Sampler**: `euler` sampler with `simple` or `beta` scheduler, 20-25 steps.

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PaceBowl - ComfyUI Prompt Generator & Flux.1 Latent Calculator</title>
+  <meta name="description" content="Free online ComfyUI prompt studio and Flux.1 / SDXL latent resolution calculator. Build descriptive natural language prompts for T5, calculate optimal 1MP aspect ratios, and copy directly into CLIP Text Encode.">
+  <meta name="keywords" content="comfyui prompt generator, flux prompt generator, comfyui resolution calculator, empty latent image aspect ratio, sdxl prompt builder, comfyui workflow, pacebowl">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://comfy.pacebowl.com/">
+
+  <!-- Umami Analytics -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="62cb9207-2003-4f8d-9079-768e39a35e72"></script>
+
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://comfy.pacebowl.com/">
+  <meta property="og:title" content="PaceBowl - Modern ComfyUI & Flux.1 Prompt Studio">
+  <meta property="og:description" content="Generate rich natural language prompts for Flux.1, calculate optimal Empty Latent aspect ratios, and export directly for ComfyUI. 100% Free & Client-Side.">
+  <meta property="og:site_name" content="PaceBowl Studio">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://comfy.pacebowl.com/">
+  <meta name="twitter:title" content="PaceBowl - ComfyUI Prompt Generator & Latent Calculator">
+  <meta name="twitter:description" content="Optimal aspect ratios and natural language prompt studio tailored for ComfyUI and Flux.1 workflows.">
+
+  <!-- Structured Data: JSON-LD for AEO & GEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://comfy.pacebowl.com/#webapp",
+        "name": "PaceBowl ComfyUI Prompt Studio",
+        "url": "https://comfy.pacebowl.com/",
+        "description": "Free web-based prompt builder and latent resolution calculator specifically crafted for ComfyUI, Flux.1, and SDXL creators.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Flux.1 Natural Language paragraph prompt generator (T5 encoder ready)",
+          "ComfyUI Empty Latent Image resolution & aspect ratio calculator (1024x1024, 1344x768, 896x1152)",
+          "Dual-mode toggle between Flux (descriptive prose) and SDXL (comma-separated tag weights)",
+          "1-Click Copy for CLIP Text Encode (Positive) and CLIP Text Encode (Negative)",
+          "Client-side zero GPU memory overhead"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://comfy.pacebowl.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why does Flux.1 require natural language instead of comma tags?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Flux.1 uses the advanced T5-XXL text encoder, which comprehends grammar, scene relationships, and natural sentences. Obsolete tags like 'masterpiece, 8k, best quality' degrade image quality in Flux, and Flux does not use negative prompts by default."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why are specific aspect ratios critical for ComfyUI Empty Latent Image?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Diffusion models like Flux.1 and SDXL are trained on roughly 1.0 megapixel buckets (approx. 1,048,576 pixels). Using arbitrary resolutions causes artifacting, duplicated heads, and distorted bodies. Optimal bucketed resolutions include 1024x1024 (1:1), 1344x768 (16:9), and 896x1152 (3:4)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does ComfyUI support <lora:name:weight> text syntax?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. In native ComfyUI, LoRA models are connected physically via 'Load LoRA' nodes in the node graph between the Model and CLIP pipelines. Writing '<lora:...>' inside CLIP Text Encode text fields has zero effect in vanilla ComfyUI."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#38bdf8',
+              500: '#0284c7',
+              600: '#0369a1',
+            },
+            surface: {
+              DEFAULT: '#07090e',
+              card: '#0f172a',
+              border: '#1e293b',
+              accent: '#334155'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #07090e; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .glow-cyan {
+      box-shadow: 0 0 35px -5px rgba(56, 189, 248, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-sky-500 text-slate-950 font-bold px-4 py-2.5 rounded-lg shadow-xl shadow-sky-500/20 text-xs flex items-center space-x-2">
+    <span>✓ Copied to clipboard!</span>
+  </div>
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg shadow-sky-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold text-lg text-white tracking-tight">PaceBowl <span class="text-sky-400 font-mono text-xs px-2 py-0.5 rounded bg-sky-950/80 border border-sky-500/30">ComfyUI Studio</span></span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+          Flux.1 & SDXL Ready (0 VRAM Overhead)
+        </span>
+        <a href="#calculator" class="text-xs text-slate-400 hover:text-slate-200 transition">Latent Calculator</a>
+        <a href="#faq" class="text-xs text-slate-400 hover:text-slate-200 transition">ComfyUI Guide</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="pt-8 pb-4 px-4 text-center max-w-4xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-500/30 text-sky-300 text-xs mb-3">
+      <span>⚡ Zero-GPU-Memory Overhead</span>
+      <span class="text-slate-600">•</span>
+      <span>T5 Natural Language Engine</span>
+    </div>
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-3">
+      ComfyUI Prompt Studio & <span class="bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Flux.1 Latent Calculator</span>
+    </h1>
+    <p class="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
+      Craft modern natural language paragraphs for Flux T5, calculate exact 1-Megapixel Empty Latent dimensions, and copy directly into CLIP Text Encode nodes without slowing down your GPU.
+    </p>
+  </section>
+
+  <!-- Main Workspace -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-6">
+
+    <!-- Section 1: Empty Latent Aspect Ratio & Resolution Calculator -->
+    <div id="calculator" class="mb-10 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl glow-cyan">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-800 gap-2">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span>
+            ComfyUI Empty Latent Resolution Calculator (1MP Buckets)
+          </h2>
+          <p class="text-xs text-slate-400">Avoid duplicate heads and stretched limbs by using native trained resolution buckets.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-mono px-2 py-1 rounded bg-slate-950 border border-slate-800 text-sky-300" id="calc-stats">1024 × 1024 (1.05 MP)</span>
+        </div>
+      </div>
+
+      <!-- Quick Ratio Buttons Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 mb-6 text-xs" id="ratio-buttons-grid">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Interactive Inputs & Copy Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+        <div class="md:col-span-3 flex items-center space-x-2">
+          <label class="text-xs text-slate-400 font-mono w-16">Width:</label>
+          <input type="number" id="input-width" value="1024" step="64" min="256" max="2048" onchange="manualResolutionChange()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
+          <button onclick="copyValue('input-width')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono">Copy</button>
+        </div>
+
+        <div class="md:col-span-3 flex items-center space-x-2">
+          <label class="text-xs text-slate-400 font-mono w-16">Height:</label>
+          <input type="number" id="input-height" value="1024" step="64" min="256" max="2048" onchange="manualResolutionChange()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
+          <button onclick="copyValue('input-height')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono">Copy</button>
+        </div>
+
+        <div class="md:col-span-6 flex items-center justify-end space-x-3">
+          <button onclick="copyFormatted('resolution')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition">
+            📋 Copy "W × H"
+          </button>
+          <button onclick="copyFormatted('json')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/30 transition">
+            🚀 Copy Empty Latent JSON
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Prompt Studio (Flux Natural Language vs SDXL) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- Left Column: Parameter & Style Configurator (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Model Mode Selector -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">1. Target Diffusion Model</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="setModelMode('flux')" id="mode-flux-btn" class="p-3 rounded-lg border text-left transition border-sky-500 bg-sky-950/40 text-white font-medium">
+              <div class="font-bold flex items-center gap-1.5">
+                <span>Flux.1 (Recommended)</span>
+                <span class="text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">T5 Prose</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-1">Natural descriptive sentences, no negative prompt</div>
+            </button>
+            <button onclick="setModelMode('sdxl')" id="mode-sdxl-btn" class="p-3 rounded-lg border text-left transition border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200">
+              <div class="font-bold flex items-center gap-1.5">
+                <span>SDXL / SD 1.5</span>
+                <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">Tag Weighted</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-1">Comma tags, (weights:1.2), dual positive/negative</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Subject Input -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">2. Core Subject & Action</label>
+          <textarea id="input-subject" rows="2" placeholder="e.g., A cybernetic samurai meditating in a rain-soaked neon garden..." oninput="assemblePrompt()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-500"></textarea>
+          <div class="flex items-center justify-between mt-2 text-[11px] text-slate-500">
+            <span>Keep it specific & active</span>
+            <button onclick="randomSubject()" class="text-sky-400 hover:underline">🎲 Random Inspiration</button>
+          </div>
+        </div>
+
+        <!-- Optics, Lens & Perspective -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">3. Photography & Lens Specs</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <select id="opt-camera" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="">Camera Framing: None</option>
+              <option value="shot on 35mm lens, candid street photography">35mm Candid Street</option>
+              <option value="shot on 85mm f/1.4 lens with shallow depth of field and soft background bokeh">85mm f/1.4 Portrait Bokeh</option>
+              <option value="shot on wide-angle 24mm lens with dramatic perspective">24mm Dramatic Wide Angle</option>
+              <option value="macro close-up photography, sharp optical focus on intricate details">Macro Detail Close-up</option>
+              <option value="cinematic medium shot, eye-level framing">Cinematic Medium Shot</option>
+              <option value="aerial drone view from high overhead angle">Aerial Drone View</option>
+            </select>
+
+            <select id="opt-film" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="">Film / Texture: None</option>
+              <option value="organic 35mm film grain, analog Kodak Portra 400 color science">Kodak Portra 400</option>
+              <option value="Fujifilm Velvia color profile, rich saturated contrast">Fujifilm Velvia</option>
+              <option value="crisp digital medium-format photograph on Hasselblad H6D">Hasselblad Digital Crisp</option>
+              <option value="gritty high-contrast black and white Ilford HP5 photography">Monochrome Ilford B&W</option>
+              <option value="soft vintage polaroid aesthetic with gentle light leaks">Vintage Polaroid</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Lighting & Atmosphere -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">4. Lighting & Environment</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <select id="opt-lighting" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="">Lighting Style: None</option>
+              <option value="golden hour warm sunlight casting long dramatic shadows">Golden Hour Sunlight</option>
+              <option value="volumetric light rays filtering through atmospheric haze and mist">Volumetric God Rays</option>
+              <option value="moody cinematic chiaroscuro with deep shadows and rim highlights">Moody Chiaroscuro</option>
+              <option value="vibrant cyberpunk neon illumination reflecting off wet surfaces">Cyberpunk Wet Neon</option>
+              <option value="soft diffused overcast morning daylight, natural gentle wrap">Diffused Overcast Soft</option>
+              <option value="studio softbox lighting with subtle rim light">Studio Three-Point Light</option>
+            </select>
+
+            <select id="opt-environment" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="">Environment: None</option>
+              <option value="surrounded by rain-slicked asphalt, damp reflection, subtle mist in the air">Rainy Urban Streets</option>
+              <option value="lush moss-covered ancient forest with morning dew">Ancient Misty Forest</option>
+              <option value="industrial brutalist concrete architecture, minimal background">Brutalist Concrete Interior</option>
+              <option value="sun-drenched minimalist loft with sheer curtains blowing">Sunlit Minimalist Loft</option>
+              <option value="futuristic space observatory overlooking celestial nebulae">Sci-Fi Space Observatory</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Render & Style Aesthetic -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">5. Art Style / Medium</label>
+          <select id="opt-style" onchange="assemblePrompt()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+            <option value="award-winning photorealistic editorial photograph">Photorealistic Editorial (National Geographic / Vogue)</option>
+            <option value="cinematic 3D render in Octane and Unreal Engine 5 style">Cinematic 3D Concept (Unreal Engine 5)</option>
+            <option value="hand-painted studio Ghibli anime aesthetic, painterly backgrounds and nostalgic charm">Studio Ghibli Anime Painterly</option>
+            <option value="vintage 1980s dark fantasy retro anime cel animation aesthetic">1980s Retro Dark Fantasy Anime</option>
+            <option value="oil painting on textured canvas with visible impasto brushstrokes">Fine Art Oil on Canvas</option>
+            <option value="intricate isometric digital concept art with detailed miniature props">Isometric Miniature Concept</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Output Box & ComfyUI Node Connection (7 cols) -->
+      <div class="lg:col-span-7 space-y-5 sticky top-20">
+
+        <!-- Positive Prompt Box -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl glow-cyan">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-200">CLIP Text Encode (Positive Prompt)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span id="token-counter" class="text-[11px] font-mono text-slate-500">~0 words</span>
+              <button onclick="copyOutput('prompt-output')" class="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy Positive
+              </button>
+            </div>
+          </div>
+
+          <textarea id="prompt-output" rows="6" class="w-full bg-[#07090e] border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 leading-relaxed focus:outline-none focus:border-sky-500 select-all"></textarea>
+        </div>
+
+        <!-- Negative Prompt Box (Only visible in SDXL Mode) -->
+        <div id="negative-box" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-200">CLIP Text Encode (Negative Prompt)</span>
+            </div>
+            <button onclick="copyOutput('negative-output')" class="px-3 py-1 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+              Copy Negative
+            </button>
+          </div>
+
+          <textarea id="negative-output" rows="3" class="w-full bg-[#07090e] border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 leading-relaxed focus:outline-none focus:border-rose-500">ugly, deformed, disfigured, poor anatomy, bad hands, missing fingers, extra limbs, low quality, blurry, watermark, signature</textarea>
+        </div>
+
+        <!-- Flux vs SDXL Architecture Guidance Banner -->
+        <div id="flux-guidance" class="p-4 rounded-xl bg-sky-950/20 border border-sky-500/20 text-xs text-slate-300 space-y-2">
+          <div class="flex items-center gap-2 font-semibold text-sky-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Flux.1 Prompting Best Practice (T5-XXL)</span>
+          </div>
+          <p class="leading-relaxed text-[11px] text-slate-400">
+            Flux does not parse tag commas like SD 1.5. Instead, write in <strong>complete descriptive sentences</strong> detailing character, optics, lighting, and composition. <strong>No negative prompt node is needed</strong>—leave the Negative conditioning unplugged in Flux workflows.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Educational & AEO Section -->
+  <section id="faq" class="max-w-5xl mx-auto px-4 py-16 border-t border-slate-800/80 mt-16">
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-sky-400 text-xs mb-3 font-mono">
+        <span>COMFYUI RUNBOOK</span>
+      </div>
+      <h2 class="text-2xl font-bold text-white mb-2">ComfyUI Prompting & Resolution Guide</h2>
+      <p class="text-slate-400 text-sm">Essential technical standards for ComfyUI and Flux.1 workflows.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
+        <h3 class="font-semibold text-slate-200 mb-2">Why do random Empty Latent resolutions fail?</h3>
+        <p class="text-slate-400 leading-relaxed text-xs">
+          Diffusion models are trained in specific bucket sizes totaling roughly 1,048,576 pixels (1 Megapixel). Entering arbitrary dimensions like 1920x1080 forces the model into untrained aspect ratios, causing multiple bodies, dual heads, or stretched textures. Always use tested buckets like 1344x768 or 1024x1024.
+        </p>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
+        <h3 class="font-semibold text-slate-200 mb-2">How are LoRAs applied in ComfyUI?</h3>
+        <p class="text-slate-400 leading-relaxed text-xs">
+          Unlike WebUI (A1111), vanilla ComfyUI does NOT parse text syntax such as <code class="text-sky-300 bg-slate-900 px-1 py-0.5 rounded">&lt;lora:name:0.8&gt;</code> in text boxes. You must insert a physical <strong>Load LoRA</strong> node, connect the Model and CLIP wires through it, and set the strength slider directly on the node.
+        </p>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
+        <h3 class="font-semibold text-slate-200 mb-2">What samplers work best with Flux.1?</h3>
+        <p class="text-slate-400 leading-relaxed text-xs">
+          The recommended setup for Flux.1 Schnell / Dev in ComfyUI is the <strong>euler</strong> sampler paired with the <strong>simple</strong> or <strong>beta</strong> scheduler. Use 20–25 steps for Dev (4 steps for Schnell) with a guidance scale of 3.5.
+        </p>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
+        <h3 class="font-semibold text-slate-200 mb-2">Why run prompt generation on the web?</h3>
+        <p class="text-slate-400 leading-relaxed text-xs">
+          Running local LLMs (like Ollama or Qwen) alongside Flux.1 or SDXL often exhausts 8GB–16GB VRAM, resulting in CUDA Out of Memory (OOM) crashes. Using PaceBowl on a second monitor offloads prompt structuring to the browser without consuming a single megabyte of GPU memory.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-[#07090e] py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span>PaceBowl &copy; 2026. Free, client-side ComfyUI creative toolkit.</span>
+      </div>
+      <div class="flex items-center space-x-6 text-slate-400">
+        <a href="#calculator" class="hover:text-slate-200 transition">Latent Calculator</a>
+        <a href="#faq" class="hover:text-slate-200 transition">ComfyUI FAQ</a>
+        <a href="https://github.com/comfyanonymous/ComfyUI" target="_blank" rel="noopener" class="hover:text-slate-200 transition">ComfyUI GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // Standard 1MP Bucketed resolutions for Flux and SDXL
+    const RESOLUTION_BUCKETS = [
+      { name: '1:1 Square', w: 1024, h: 1024, ratio: '1:1', tag: 'Social / Avatar' },
+      { name: '16:9 Cinema', w: 1344, h: 768, ratio: '16:9', tag: 'Landscape / Wallpaper' },
+      { name: '9:16 Story', w: 768, h: 1344, ratio: '9:16', tag: 'Reels / Mobile' },
+      { name: '4:3 Standard', w: 1152, h: 896, ratio: '4:3', tag: 'Classic Landscape' },
+      { name: '3:4 Portrait', w: 896, h: 1152, ratio: '3:4', tag: 'Classic Portrait' },
+      { name: '21:9 Ultra', w: 1536, h: 640, ratio: '21:9', tag: 'Ultra-wide Cinema' },
+      { name: '3:2 Photo', w: 1216, h: 832, ratio: '3:2', tag: '35mm Landscape' },
+      { name: '2:3 Photo', w: 832, h: 1216, ratio: '2:3', tag: '35mm Portrait' }
+    ];
+
+    let currentModel = 'flux'; // 'flux' | 'sdxl'
+    let currentBucket = RESOLUTION_BUCKETS[0];
+
+    const INSPIRATION_SUBJECTS = [
+      "An elderly watchmaker meticulously repairing a miniature mechanical universe inside a pocket watch",
+      "A futuristic botanist tending to bioluminescent neon orchids in an orbital space greenhouse",
+      "A weathered fisherman guiding a wooden boat across a tranquil misty fjord at dawn",
+      "A cyberpunk street food vendor stirring a glowing cauldron of steaming broth in a rainy neon alley",
+      "A majestic snow leopard resting gracefully on a sheer Himalayan granite cliff during a blizzard",
+      "An astronaut discovering an ancient crystalline monument buried beneath Martian red dunes"
+    ];
+
+    function initCalculator() {
+      const container = document.getElementById('ratio-buttons-grid');
+      container.innerHTML = '';
+
+      RESOLUTION_BUCKETS.forEach((b, idx) => {
+        const btn = document.createElement('button');
+        const isActive = b.w === currentBucket.w && b.h === currentBucket.h;
+        btn.id = `bucket-btn-${idx}`;
+        btn.className = `p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+          isActive 
+            ? 'border-sky-500 bg-sky-950/40 text-white font-medium shadow-sm shadow-sky-500/20' 
+            : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+        }`;
+        btn.innerHTML = `
+          <div class="font-bold text-slate-200">${b.ratio}</div>
+          <div class="text-[11px] font-mono text-sky-400 mt-1">${b.w}×${b.h}</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 truncate">${b.tag}</div>
+        `;
+        btn.onclick = () => selectBucket(b);
+        container.appendChild(btn);
+      });
+
+      updateCalcStats();
+    }
+
+    function selectBucket(b) {
+      currentBucket = b;
+      document.getElementById('input-width').value = b.w;
+      document.getElementById('input-height').value = b.h;
+      initCalculator();
+    }
+
+    function manualResolutionChange() {
+      const w = parseInt(document.getElementById('input-width').value) || 1024;
+      const h = parseInt(document.getElementById('input-height').value) || 1024;
+      currentBucket = { name: 'Custom', w: w, h: h, ratio: `${w}:${h}` };
+      updateCalcStats();
+    }
+
+    function updateCalcStats() {
+      const w = parseInt(document.getElementById('input-width').value) || 1024;
+      const h = parseInt(document.getElementById('input-height').value) || 1024;
+      const mp = ((w * h) / 1000000).toFixed(2);
+      document.getElementById('calc-stats').textContent = `${w} × ${h} (${mp} MP)`;
+    }
+
+    function setModelMode(mode) {
+      currentModel = mode;
+      const fluxBtn = document.getElementById('mode-flux-btn');
+      const sdxlBtn = document.getElementById('mode-sdxl-btn');
+      const negBox = document.getElementById('negative-box');
+      const fluxGuide = document.getElementById('flux-guidance');
+
+      if (mode === 'flux') {
+        fluxBtn.className = "p-3 rounded-lg border text-left transition border-sky-500 bg-sky-950/40 text-white font-medium";
+        sdxlBtn.className = "p-3 rounded-lg border text-left transition border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200";
+        negBox.classList.add('hidden');
+        fluxGuide.classList.remove('hidden');
+      } else {
+        sdxlBtn.className = "p-3 rounded-lg border text-left transition border-sky-500 bg-sky-950/40 text-white font-medium";
+        fluxBtn.className = "p-3 rounded-lg border text-left transition border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200";
+        negBox.classList.remove('hidden');
+        fluxGuide.classList.add('hidden');
+      }
+
+      assemblePrompt();
+    }
+
+    function randomSubject() {
+      const choice = INSPIRATION_SUBJECTS[Math.floor(Math.random() * INSPIRATION_SUBJECTS.length)];
+      document.getElementById('input-subject').value = choice;
+      assemblePrompt();
+    }
+
+    function assemblePrompt() {
+      const subject = document.getElementById('input-subject').value.trim();
+      const camera = document.getElementById('opt-camera').value;
+      const film = document.getElementById('opt-film').value;
+      const lighting = document.getElementById('opt-lighting').value;
+      const env = document.getElementById('opt-environment').value;
+      const style = document.getElementById('opt-style').value;
+
+      let assembled = "";
+
+      if (currentModel === 'flux') {
+        // Flux natural language paragraph composition
+        const parts = [];
+        if (style) parts.push(`A ${style}`);
+        if (subject) parts.push(`featuring ${subject}.`);
+        if (env) parts.push(`The scene is set ${env}.`);
+        if (lighting) parts.push(`Illuminated by ${lighting}.`);
+        if (camera) parts.push(`Captured ${camera}.`);
+        if (film) parts.push(`Rendered with ${film}.`);
+
+        assembled = parts.join(" ");
+        if (!assembled.trim()) {
+          assembled = "A photorealistic editorial photograph featuring an astronaut walking through a neon cybernetic garden at twilight. Captured shot on 35mm lens, candid street photography with volumetric warm lighting.";
+        }
+      } else {
+        // SDXL comma-separated tag composition
+        const tags = [];
+        if (subject) tags.push(`(${subject}:1.2)`);
+        if (style) tags.push(style);
+        if (camera) tags.push(camera);
+        if (lighting) tags.push(lighting);
+        if (env) tags.push(env);
+        if (film) tags.push(film);
+        tags.push("highly detailed", "masterpiece", "sharp focus");
+
+        assembled = tags.filter(Boolean).join(", ");
+      }
+
+      document.getElementById('prompt-output').value = assembled;
+
+      // Word count
+      const words = assembled.split(/\s+/).filter(Boolean).length;
+      document.getElementById('token-counter').textContent = `~${words} words`;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg || '✓ Copied to clipboard!';
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        t.classList.add('translate-y-20', 'opacity-0');
+      }, 1800);
+    }
+
+    function copyOutput(id) {
+      const el = document.getElementById(id);
+      navigator.clipboard.writeText(el.value).then(() => {
+        showToast('✓ Copied for CLIP Text Encode!');
+      });
+    }
+
+    function copyValue(id) {
+      const val = document.getElementById(id).value;
+      navigator.clipboard.writeText(val).then(() => {
+        showToast(`✓ Copied ${val}`);
+      });
+    }
+
+    function copyFormatted(type) {
+      const w = document.getElementById('input-width').value;
+      const h = document.getElementById('input-height').value;
+      if (type === 'resolution') {
+        navigator.clipboard.writeText(`${w}x${h}`).then(() => {
+          showToast(`✓ Copied "${w}x${h}"`);
+        });
+      } else if (type === 'json') {
+        const jsonStr = JSON.stringify({
+          "class_type": "EmptyLatentImage",
+          "inputs": {
+            "width": parseInt(w),
+            "height": parseInt(h),
+            "batch_size": 1
+          }
+        }, null, 2);
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          showToast('✓ Copied EmptyLatentImage JSON!');
+        });
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      initCalculator();
+      randomSubject();
+    });
+  </script>
+</body>
+</html>

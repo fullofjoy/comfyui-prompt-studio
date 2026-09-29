@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Explicitly allow AI / Generative Search Engines (GEO & AEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://comfy.pacebowl.com/sitemap.xml
