@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Aspect Ratio Buckets)</title>
+  <meta name="description" content="Why entering 1920x1080 into ComfyUI Empty Latent Image causes duplicate bodies and distorted limbs. Complete guide to native 1MP resolution buckets for Flux.1 and SDXL.">
+  <meta name="keywords" content="comfyui empty latent resolution, comfyui aspect ratio buckets, flux resolution guide, sdxl empty latent image, comfyui 1024x1024 1344x768">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html">
+
+  <!-- Umami Analytics -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="62cb9207-2003-4f8d-9079-768e39a35e72"></script>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html">
+  <meta property="og:title" content="The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Buckets)">
+  <meta property="og:description" content="Avoid anatomical distortions by setting correct 1MP resolution buckets in ComfyUI for Flux.1 and SDXL.">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Aspect Ratio Buckets)",
+        "description": "Technical guide explaining why diffusion models fail at arbitrary resolutions and providing the exact 1-Megapixel bucketed dimensions for ComfyUI Empty Latent Image.",
+        "inLanguage": "en",
+        "author": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        },
+        "datePublished": "2026-09-29",
+        "dateModified": "2026-09-29",
+        "publisher": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://comfy.pacebowl.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "https://comfy.pacebowl.com/blog/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Empty Latent Resolution Guide",
+            "item": "https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#07090e] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+        </div>
+        <span class="font-bold text-base text-white tracking-tight">PaceBowl <span class="text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-500/30">ComfyUI</span></span>
+      </a>
+      <div class="flex items-center space-x-4 text-xs">
+        <a href="/blog/" class="text-slate-400 hover:text-slate-200 transition">← Back to Blog</a>
+        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 transition">Launch Calculator</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Article -->
+  <article class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-300">Home</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-300">Blog</a>
+      <span>/</span>
+      <span class="text-sky-400">Latent Resolution Guide</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+        The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Aspect Ratio Buckets)
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-400">
+        <span>By PaceBowl Research Team</span>
+        <span>•</span>
+        <span>Updated September 2026</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-500/30 font-mono">5 min read</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-sky-950/30 border border-sky-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-sky-200">Need instant Empty Latent dimensions?</span>
+        <div class="text-slate-400 text-[11px] mt-0.5">Use our free visual calculator to click any ratio (16:9, 9:16, 21:9) and copy values in 1 click.</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">Open Calculator →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-300 text-sm leading-relaxed">
+      <p>
+        One of the most frequent mistakes beginners make when transitioning from Midjourney or WebUI to ComfyUI is typing arbitrary video dimensions like <code>1920</code> (Width) and <code>1080</code> (Height) directly into the <strong>Empty Latent Image</strong> node.
+      </p>
+      <p>
+        The generation completes, but the image is plagued with deformed figures, dual torsos, or duplicate heads. In this guide, we break down why this happens and give you the exact resolution lookup table trained into modern foundation models like <strong>Flux.1</strong> and <strong>SDXL</strong>.
+      </p>
+
+      <h2 class="text-xl font-bold text-white pt-4">The Science Behind "Aspect Ratio Bucketing"</h2>
+      <p>
+        During pre-training, diffusion models are not fed arbitrary screen sizes. Black Forest Labs (for Flux.1) and Stability AI (for SDXL) trained their models using <strong>aspect ratio bucketing</strong>.
+      </p>
+      <p>
+        Each bucket is strictly calibrated to maintain a total area of approximately <strong>1,048,576 pixels (1.0 Megapixel)</strong>, and both dimensions must be divisible by 64 (or 16) to align with the VAE latent compression factor.
+      </p>
+      <p>
+        When you feed an uncalibrated resolution like 1920x1080 (which is 2.07 Megapixels, double the native capacity), the model's self-attention layers perceive excessive canvas space. Having no concept of a 2MP single scene, the diffusion process attempts to tile two 1MP concepts side-by-side—spawning duplicate bodies or repeating horizon lines.
+      </p>
+
+      <h2 class="text-xl font-bold text-white pt-4">Complete 1MP Resolution Lookup Table</h2>
+      <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60 my-4">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase font-semibold">
+            <tr>
+              <th class="py-3 px-4">Aspect Ratio</th>
+              <th class="py-3 px-4 text-sky-400">Width × Height</th>
+              <th class="py-3 px-4">Total Pixels</th>
+              <th class="py-3 px-4">Best Used For</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60">
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">1:1 Square</td>
+              <td class="py-3 px-4 font-mono text-sky-300">1024 × 1024</td>
+              <td class="py-3 px-4 text-slate-400">1,048,576 (1.05 MP)</td>
+              <td class="py-3 px-4 text-slate-400">Avatars, album covers, Instagram grid</td>
+            </tr>
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">16:9 Landscape</td>
+              <td class="py-3 px-4 font-mono text-sky-300">1344 × 768</td>
+              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-400">Desktop wallpapers, YouTube thumbnails, landscapes</td>
+            </tr>
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">9:16 Portrait</td>
+              <td class="py-3 px-4 font-mono text-sky-300">768 × 1344</td>
+              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-400">TikTok, Instagram Reels, smartphone wallpapers</td>
+            </tr>
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">4:3 Standard</td>
+              <td class="py-3 px-4 font-mono text-sky-300">1152 × 896</td>
+              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-400">Editorial photography, retro TV aesthetic</td>
+            </tr>
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">3:4 Portrait</td>
+              <td class="py-3 px-4 font-mono text-sky-300">896 × 1152</td>
+              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-400">Fashion model portraits, poster prints</td>
+            </tr>
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">21:9 Ultra-Wide</td>
+              <td class="py-3 px-4 font-mono text-sky-300">1536 × 640</td>
+              <td class="py-3 px-4 text-slate-400">983,040 (0.98 MP)</td>
+              <td class="py-3 px-4 text-slate-400">Cinematic anamorphic film stills</td>
+            </tr>
+            <tr class="hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-white">3:2 Classic Photo</td>
+              <td class="py-3 px-4 font-mono text-sky-300">1216 × 832</td>
+              <td class="py-3 px-4 text-slate-400">1,011,712 (1.01 MP)</td>
+              <td class="py-3 px-4 text-slate-400">Standard 35mm DSLR landscape</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="text-xl font-bold text-white pt-4">How to Upscale to 4K Properly</h2>
+      <p>
+        If your end goal is a crisp 4K wallpaper (3840×2160), <strong>do not generate at 4K in Empty Latent</strong>. The correct ComfyUI workflow pipeline is:
+      </p>
+      <ol class="list-decimal pl-5 space-y-2 text-slate-400">
+        <li>Generate the base composition at <strong>1344×768</strong> in Empty Latent Image.</li>
+        <li>Pass the decoded VAE output through an <strong>Upscale Model Loader</strong> (using models like <code>4x-UltraSharp</code> or <code>4x_NMKD-Superscale</code>).</li>
+        <li>(Optional) Perform a gentle second-pass <strong>KSampler (Inpainting/Hires fix)</strong> with a low denoise value between <code>0.25</code> and <code>0.35</code> to sharpen fine textures without altering the core scene composition.</li>
+      </ol>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-slate-900 border border-sky-500/30 text-center">
+      <h3 class="text-lg font-bold text-white mb-2">Try the Interactive Latent Calculator</h3>
+      <p class="text-slate-400 text-xs mb-4">Click any ratio button to instantly copy dimensions or JSON directly into your ComfyUI workflow.</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
+        Open PaceBowl Calculator →
+      </a>
+    </div>
+  </article>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-[#07090e] py-8 text-center text-xs text-slate-500">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>PaceBowl &copy; 2026.</span>
+      <div class="flex items-center space-x-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">Studio</a>
+        <a href="/blog/" class="hover:text-slate-200 transition">Blog</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

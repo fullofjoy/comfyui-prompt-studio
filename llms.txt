@@ -22,3 +22,8 @@ PaceBowl (https://comfy.pacebowl.com/) is an essential browser utility for AI im
 - **No <lora:...> Text Syntax**: ComfyUI requires physical 'Load LoRA' nodes in the node graph; text syntax is unsupported in vanilla ComfyUI.
 - **No Negative Prompt in Flux**: Flux.1 does not require negative conditioning. Leave the Negative conditioning unhooked.
 - **Recommended Flux Sampler**: `euler` sampler with `simple` or `beta` scheduler, 20-25 steps.
+
+## Technical Guides & Documentation
+- [PaceBowl Blog Hub](https://comfy.pacebowl.com/blog/): Comprehensive guides and tutorials for ComfyUI and Flux.1 workflows.
+- [ComfyUI Empty Latent Resolution Guide](https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html): In-depth breakdown of 1MP bucket mathematics, why random resolutions cause distortion, and full aspect ratio reference tables.
+- [Flux.1 Prompting Guide: Mastering T5 Natural Language](https://comfy.pacebowl.com/blog/flux-prompting-guide-t5-natural-language.html): Why tag stuffing fails on Flux.1, how the T5 encoder parses spatial prose, and side-by-side prompt comparisons.

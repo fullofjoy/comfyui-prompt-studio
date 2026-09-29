@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComfyUI & Flux.1 Workflow Guides - PaceBowl Studio Blog</title>
+  <meta name="description" content="Master ComfyUI Empty Latent aspect ratios, Flux.1 T5 natural language prompting, and optimal sampler configurations without exhausting GPU memory.">
+  <meta name="keywords" content="comfyui guides, flux prompt tutorial, empty latent resolution buckets, comfyui workflow tips, pacebowl blog">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://comfy.pacebowl.com/blog/">
+
+  <!-- Umami Analytics -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="62cb9207-2003-4f8d-9079-768e39a35e72"></script>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://comfy.pacebowl.com/blog/">
+  <meta property="og:title" content="ComfyUI & Flux.1 Workflow Guides - PaceBowl Studio Blog">
+  <meta property="og:description" content="Technical runbooks for ComfyUI creators: latent resolution buckets, Flux T5 prompt engineering, and node graph optimization.">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "PaceBowl ComfyUI Knowledge Hub",
+    "url": "https://comfy.pacebowl.com/blog/",
+    "description": "Production guides and latent resolution blueprints for ComfyUI and Flux.1 workflows.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "PaceBowl Studio"
+    }
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#07090e] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- Nav -->
+  <header class="border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+        </div>
+        <span class="font-bold text-base text-white tracking-tight">PaceBowl <span class="text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-500/30">ComfyUI Blog</span></span>
+      </a>
+      <div class="flex items-center space-x-4">
+        <a href="/" class="inline-flex items-center px-3.5 py-1.5 rounded-md text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-sm shadow-sky-500/20 transition">
+          Launch Studio →
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="pt-12 pb-8 px-4 text-center max-w-3xl mx-auto">
+    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-500/30 text-sky-300 text-xs mb-3 font-mono">
+      <span>COMFYUI & FLUX.1 RUNBOOK</span>
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+      ComfyUI Workflow & <span class="bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Latent Engineering</span> Guides
+    </h1>
+    <p class="text-slate-400 text-sm max-w-xl mx-auto">
+      Fix distorted anatomy, eliminate duplicate heads with proper resolution buckets, and master natural language prompt composition for Flux.1.
+    </p>
+  </section>
+
+  <!-- Article Grid -->
+  <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Article 1 -->
+      <article class="bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-6 transition flex flex-col justify-between group shadow-lg">
+        <div>
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-3">
+            <span class="px-2 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-500/30 font-mono text-[10px]">RESOLUTION BUCKETS</span>
+            <span>5 min read</span>
+          </div>
+          <h2 class="text-lg font-bold text-white group-hover:text-sky-300 transition mb-2">
+            <a href="/blog/comfyui-empty-latent-resolution-guide.html">The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Buckets)</a>
+          </h2>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Why typing 1920x1080 creates duplicate limbs and mutated faces. Learn the exact 1-Megapixel resolution buckets Flux.1 and SDXL were trained on.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <span class="text-slate-500">Updated Sept 2026</span>
+          <a href="/blog/comfyui-empty-latent-resolution-guide.html" class="text-sky-400 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">Read Guide →</a>
+        </div>
+      </article>
+
+      <!-- Article 2 -->
+      <article class="bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-6 transition flex flex-col justify-between group shadow-lg">
+        <div>
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-3">
+            <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 font-mono text-[10px]">FLUX.1 PROMPTING</span>
+            <span>7 min read</span>
+          </div>
+          <h2 class="text-lg font-bold text-white group-hover:text-sky-300 transition mb-2">
+            <a href="/blog/flux-prompting-guide-t5-natural-language.html">Flux.1 Prompt Engineering Guide: Why Natural Language Destroys Comma Tags</a>
+          </h2>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Stop pasting 'masterpiece, 8k, best quality'. Understand how the T5-XXL text encoder handles composition, lighting, camera optics, and why negative prompts are useless in Flux.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <span class="text-slate-500">Updated Sept 2026</span>
+          <a href="/blog/flux-prompting-guide-t5-natural-language.html" class="text-sky-400 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">Read Guide →</a>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- CTA Box -->
+    <div class="mt-12 p-8 rounded-2xl bg-gradient-to-r from-sky-950/60 to-slate-900 border border-sky-500/30 text-center max-w-3xl mx-auto shadow-xl">
+      <h3 class="text-xl font-bold text-white mb-2">Build Flux Prompts & Calculate Latents with 0 VRAM Overhead</h3>
+      <p class="text-slate-400 text-xs mb-5 max-w-lg mx-auto">Use PaceBowl on your second monitor while ComfyUI renders. Click any aspect ratio to copy dimensions or JSON directly into your canvas.</p>
+      <a href="/" class="inline-flex items-center px-5 py-2.5 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-lg shadow-sky-500/20 transition">
+        Open PaceBowl ComfyUI Studio →
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-[#07090e] py-8 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>PaceBowl &copy; 2026.</span>
+      <div class="flex items-center space-x-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">Studio</a>
+        <a href="/blog/" class="hover:text-slate-200 transition">Blog</a>
+        <a href="/#calculator" class="hover:text-slate-200 transition">Calculator</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
