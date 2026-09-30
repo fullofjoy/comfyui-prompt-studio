@@ -235,28 +235,69 @@
         <!-- Injected via JS -->
       </div>
 
-      <!-- Interactive Inputs & Copy Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
-        <div class="md:col-span-3 flex items-center space-x-2">
-          <label class="text-xs text-slate-400 font-mono w-16">Width:</label>
-          <input type="number" id="input-width" value="1024" step="64" min="256" max="2048" onchange="manualResolutionChange()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
-          <button onclick="copyValue('input-width')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono">Copy</button>
+      <!-- Interactive Inputs, Visual Aspect Preview & Node Copy -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-slate-950/70 p-5 rounded-xl border border-slate-800/80">
+        
+        <!-- Visual Aspect Canvas Preview Box (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col items-center justify-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
+          <div class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between w-full px-1">
+            <span>Visual Aspect Framing</span>
+            <span id="vae-badge" class="px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/30">✓ VAE 64-Aligned</span>
+          </div>
+          <!-- Canvas Frame with Rule of Thirds Grid -->
+          <div class="w-full h-32 flex items-center justify-center relative bg-[#07090e] rounded-lg border border-slate-800 overflow-hidden">
+            <div id="aspect-preview-frame" class="relative border-2 border-sky-400/80 bg-sky-500/10 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center" style="width: 90px; height: 90px;">
+              <!-- Rule of thirds lines -->
+              <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-25">
+                <div class="border-r border-b border-sky-300"></div>
+                <div class="border-r border-b border-sky-300"></div>
+                <div class="border-b border-sky-300"></div>
+                <div class="border-r border-b border-sky-300"></div>
+                <div class="border-r border-b border-sky-300"></div>
+                <div class="border-b border-sky-300"></div>
+                <div class="border-r border-b border-sky-300"></div>
+                <div class="border-r border-b border-sky-300"></div>
+                <div></div>
+              </div>
+              <span id="aspect-ratio-label" class="relative z-10 text-[11px] font-mono font-bold text-white bg-slate-950/80 px-1.5 py-0.5 rounded shadow">1:1</span>
+            </div>
+          </div>
+          <div class="text-[10px] font-mono text-slate-500 mt-2 flex items-center justify-between w-full px-1">
+            <span id="pixel-count-label">1,048,576 px</span>
+            <span id="budget-percentage" class="text-sky-400 font-semibold">100% of 1MP</span>
+          </div>
         </div>
 
-        <div class="md:col-span-3 flex items-center space-x-2">
-          <label class="text-xs text-slate-400 font-mono w-16">Height:</label>
-          <input type="number" id="input-height" value="1024" step="64" min="256" max="2048" onchange="manualResolutionChange()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
-          <button onclick="copyValue('input-height')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono">Copy</button>
+        <!-- Manual Inputs & Copy Actions (8 cols) -->
+        <div class="lg:col-span-8 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex items-center space-x-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+              <label class="text-xs text-slate-400 font-mono w-14">Width:</label>
+              <input type="number" id="input-width" value="1024" step="64" min="256" max="2048" oninput="manualResolutionChange()" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
+              <button onclick="copyValue('input-width')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono shrink-0">Copy</button>
+            </div>
+
+            <div class="flex items-center space-x-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+              <label class="text-xs text-slate-400 font-mono w-14">Height:</label>
+              <input type="number" id="input-height" value="1024" step="64" min="256" max="2048" oninput="manualResolutionChange()" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
+              <button onclick="copyValue('input-height')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono shrink-0">Copy</button>
+            </div>
+          </div>
+
+          <!-- 1-Click Clipboard Actions -->
+          <div class="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-slate-800/60">
+            <button onclick="copyFormatted('resolution')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+              📋 Copy "W × H"
+            </button>
+            <button onclick="copyFormatted('json')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+              📄 JSON
+            </button>
+            <button onclick="copyEmptyLatentNode()" id="node-latent-btn" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/20 transition transform active:scale-95" title="Copy serialized ComfyUI node to clipboard. Switch to ComfyUI canvas and press Ctrl+V to paste!">
+              ⚡ Copy EmptyLatent Node (Canvas Ctrl+V)
+            </button>
+          </div>
         </div>
 
-        <div class="md:col-span-6 flex items-center justify-end space-x-3">
-          <button onclick="copyFormatted('resolution')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition">
-            📋 Copy "W × H"
-          </button>
-          <button onclick="copyFormatted('json')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/30 transition">
-            🚀 Copy Empty Latent JSON
-          </button>
-        </div>
       </div>
     </div>
 
@@ -309,6 +350,9 @@
               <option value="macro close-up photography, sharp optical focus on intricate details">Macro Detail Close-up</option>
               <option value="cinematic medium shot, eye-level framing">Cinematic Medium Shot</option>
               <option value="aerial drone view from high overhead angle">Aerial Drone View</option>
+              <option value="dramatic low-angle hero shot looking up from ground level">Low-Angle Hero Shot</option>
+              <option value="intimate first-person POV shot from viewer perspective">First-Person POV Angle</option>
+              <option value="telephoto 200mm compression with isolated subject against compressed background">Telephoto 200mm Compression</option>
             </select>
 
             <select id="opt-film" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
@@ -318,6 +362,8 @@
               <option value="crisp digital medium-format photograph on Hasselblad H6D">Hasselblad Digital Crisp</option>
               <option value="gritty high-contrast black and white Ilford HP5 photography">Monochrome Ilford B&W</option>
               <option value="soft vintage polaroid aesthetic with gentle light leaks">Vintage Polaroid</option>
+              <option value="cinematic 35mm Arri Alexa Hollywood color science with teal and orange grade">Arri Alexa Cinematic Grade</option>
+              <option value="nostalgic Kodachrome 64 vintage documentary color palette">Kodachrome 64 Vintage</option>
             </select>
           </div>
         </div>
@@ -334,6 +380,8 @@
               <option value="vibrant cyberpunk neon illumination reflecting off wet surfaces">Cyberpunk Wet Neon</option>
               <option value="soft diffused overcast morning daylight, natural gentle wrap">Diffused Overcast Soft</option>
               <option value="studio softbox lighting with subtle rim light">Studio Three-Point Light</option>
+              <option value="bioluminescent ambient glow radiating in deep darkness">Bioluminescent Deep Glow</option>
+              <option value="intimate warm flickering candlelight with soft falloff">Flickering Candlelight</option>
             </select>
 
             <select id="opt-environment" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
@@ -343,6 +391,8 @@
               <option value="industrial brutalist concrete architecture, minimal background">Brutalist Concrete Interior</option>
               <option value="sun-drenched minimalist loft with sheer curtains blowing">Sunlit Minimalist Loft</option>
               <option value="futuristic space observatory overlooking celestial nebulae">Sci-Fi Space Observatory</option>
+              <option value="serene Kyoto Japanese zen rock garden with bamboo groves">Kyoto Zen Bamboo Garden</option>
+              <option value="sun-bleached Mediterranean coastal terrace overlooking turquoise waters">Mediterranean Coastal Villa</option>
             </select>
           </div>
         </div>
@@ -357,6 +407,22 @@
             <option value="vintage 1980s dark fantasy retro anime cel animation aesthetic">1980s Retro Dark Fantasy Anime</option>
             <option value="oil painting on textured canvas with visible impasto brushstrokes">Fine Art Oil on Canvas</option>
             <option value="intricate isometric digital concept art with detailed miniature props">Isometric Miniature Concept</option>
+            <option value="hyper-detailed graphite pencil architectural sketch on textured paper">Graphite Pencil Architectural Sketch</option>
+            <option value="futuristic retro-sci-fi concept illustration inspired by Moebius and Syd Mead">Moebius / Syd Mead Sci-Fi Illustration</option>
+          </select>
+        </div>
+
+        <!-- Surface Texture & Micro-Detail -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">6. Surface Texture & Micro-Detail</label>
+          <select id="opt-texture" onchange="assemblePrompt()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+            <option value="">Texture Focus: None</option>
+            <option value="intricate skin pores, fine facial peach fuzz, and natural photorealistic skin texture">Photorealistic Skin Pores & Micro-Texture</option>
+            <option value="visible fabric weave, intricate embroidery, and natural textile threading">Textile & Fabric Weave Detail</option>
+            <option value="delicate translucent subsurface scattering (SSS) with luminous skin realism">Subsurface Scattering (Skin Luminous SSS)</option>
+            <option value="weathered metallic patina, industrial scratches, and fine mechanical wear">Weathered Industrial Patina & Scratches</option>
+            <option value="glistening dew drops, wet crystalline specular highlights, and surface moisture">Dew Drops & Specular Highlights</option>
+            <option value="chipped lacquer, aged cracked surface texture, and historical authentic patina">Antique Chipped Lacquer & Craquelure</option>
           </select>
         </div>
 
@@ -374,11 +440,12 @@
             </div>
             <div class="flex items-center space-x-2">
               <span id="token-counter" class="text-[11px] font-mono text-slate-500">~0 words</span>
-              <button onclick="copyOutput('prompt-output')" class="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Copy Positive
+              <button onclick="copyOutput('prompt-output')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                Copy Text
+              </button>
+              <button onclick="copyClipNode()" id="clip-node-btn" class="px-3.5 py-1.5 rounded-md text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition flex items-center gap-1.5" title="Copy serialized CLIP Text Encode node to clipboard. Switch to ComfyUI canvas and press Ctrl+V to paste!">
+                ⚡ Copy Node (Canvas Ctrl+V)
               </button>
             </div>
           </div>
@@ -561,6 +628,63 @@
       const h = parseInt(document.getElementById('input-height').value) || 1024;
       const mp = ((w * h) / 1000000).toFixed(2);
       document.getElementById('calc-stats').textContent = `${w} × ${h} (${mp} MP)`;
+      updateVisualPreview(w, h);
+    }
+
+    function updateVisualPreview(w, h) {
+      const maxW = 110;
+      const maxH = 95;
+      let pw = maxW;
+      let ph = maxH;
+
+      if (w >= h) {
+        pw = maxW;
+        ph = Math.max(22, Math.round(maxW * (h / w)));
+      } else {
+        ph = maxH;
+        pw = Math.max(22, Math.round(maxH * (w / h)));
+      }
+
+      const frame = document.getElementById('aspect-preview-frame');
+      if (frame) {
+        frame.style.width = `${pw}px`;
+        frame.style.height = `${ph}px`;
+      }
+
+      const ratioLabel = document.getElementById('aspect-ratio-label');
+      if (ratioLabel) {
+        ratioLabel.textContent = currentBucket.ratio || `${w}:${h}`;
+      }
+
+      const pixelLabel = document.getElementById('pixel-count-label');
+      if (pixelLabel) {
+        pixelLabel.textContent = `${(w * h).toLocaleString()} px`;
+      }
+
+      const budgetEl = document.getElementById('budget-percentage');
+      if (budgetEl) {
+        const pct = Math.round(((w * h) / 1048576) * 100);
+        budgetEl.textContent = `${pct}% of 1MP`;
+        if (pct > 115) {
+          budgetEl.className = 'text-rose-400 font-semibold';
+        } else if (pct < 85) {
+          budgetEl.className = 'text-amber-400 font-semibold';
+        } else {
+          budgetEl.className = 'text-sky-400 font-semibold';
+        }
+      }
+
+      const vaeBadge = document.getElementById('vae-badge');
+      if (vaeBadge) {
+        const isSafe = (w % 64 === 0) && (h % 64 === 0);
+        if (isSafe) {
+          vaeBadge.textContent = '✓ VAE 64-Aligned';
+          vaeBadge.className = 'px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/30';
+        } else {
+          vaeBadge.textContent = '⚠ Not 64-Aligned!';
+          vaeBadge.className = 'px-1.5 py-0.5 rounded text-[10px] font-bold text-amber-400 bg-amber-950/80 border border-amber-500/30';
+        }
+      }
     }
 
     function setModelMode(mode) {
@@ -598,6 +722,7 @@
       const lighting = document.getElementById('opt-lighting').value;
       const env = document.getElementById('opt-environment').value;
       const style = document.getElementById('opt-style').value;
+      const texture = document.getElementById('opt-texture')?.value || '';
 
       let assembled = "";
 
@@ -610,6 +735,7 @@
         if (lighting) parts.push(`Illuminated by ${lighting}.`);
         if (camera) parts.push(`Captured ${camera}.`);
         if (film) parts.push(`Rendered with ${film}.`);
+        if (texture) parts.push(`Featuring ${texture}.`);
 
         assembled = parts.join(" ");
         if (!assembled.trim()) {
@@ -624,6 +750,7 @@
         if (lighting) tags.push(lighting);
         if (env) tags.push(env);
         if (film) tags.push(film);
+        if (texture) tags.push(texture);
         tags.push("highly detailed", "masterpiece", "sharp focus");
 
         assembled = tags.filter(Boolean).join(", ");
@@ -642,13 +769,13 @@
       t.classList.remove('translate-y-20', 'opacity-0');
       setTimeout(() => {
         t.classList.add('translate-y-20', 'opacity-0');
-      }, 1800);
+      }, 2000);
     }
 
     function copyOutput(id) {
       const el = document.getElementById(id);
       navigator.clipboard.writeText(el.value).then(() => {
-        showToast('✓ Copied for CLIP Text Encode!');
+        showToast('✓ Copied text for CLIP Text Encode!');
       });
     }
 
@@ -679,6 +806,98 @@
           showToast('✓ Copied EmptyLatentImage JSON!');
         });
       }
+    }
+
+    function copyEmptyLatentNode() {
+      const w = parseInt(document.getElementById('input-width').value) || 1024;
+      const h = parseInt(document.getElementById('input-height').value) || 1024;
+
+      const comfyPayload = {
+        "nodes": [
+          {
+            "id": 1001,
+            "type": "EmptyLatentImage",
+            "pos": [200, 200],
+            "size": [315, 106],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "LATENT",
+                "type": "LATENT",
+                "links": null,
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "EmptyLatentImage"
+            },
+            "widgets_values": [w, h, 1]
+          }
+        ],
+        "links": []
+      };
+
+      navigator.clipboard.writeText(JSON.stringify(comfyPayload, null, 2)).then(() => {
+        showToast('⚡ EmptyLatent node copied! Press Ctrl+V in ComfyUI');
+        const btn = document.getElementById('node-latent-btn');
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✓ Copied (Ctrl+V on Comfy Canvas)!';
+          setTimeout(() => { btn.innerHTML = orig; }, 2200);
+        }
+      });
+    }
+
+    function copyClipNode() {
+      const promptText = document.getElementById('prompt-output').value.trim();
+
+      const comfyClipPayload = {
+        "nodes": [
+          {
+            "id": 1002,
+            "type": "CLIPTextEncode",
+            "pos": [200, 200],
+            "size": [400, 180],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "clip",
+                "type": "CLIP",
+                "link": null
+              }
+            ],
+            "outputs": [
+              {
+                "name": "CONDITIONING",
+                "type": "CONDITIONING",
+                "links": null,
+                "slot_index": 0
+              }
+            ],
+            "title": "CLIP Text Encode (PaceBowl)",
+            "properties": {
+              "Node name for S&R": "CLIPTextEncode"
+            },
+            "widgets_values": [promptText]
+          }
+        ],
+        "links": []
+      };
+
+      navigator.clipboard.writeText(JSON.stringify(comfyClipPayload, null, 2)).then(() => {
+        showToast('⚡ CLIP node copied! Press Ctrl+V in ComfyUI');
+        const btn = document.getElementById('clip-node-btn');
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✓ Node Copied!';
+          setTimeout(() => { btn.innerHTML = orig; }, 2200);
+        }
+      });
     }
 
     // Initialize
