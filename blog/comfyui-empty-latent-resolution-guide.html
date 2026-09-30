@@ -17,13 +17,35 @@
   <!-- Umami Analytics -->
   <script defer src="https://umami-ruby-alpha-96.vercel.app/script.js" data-website-id="f19f74d0-d931-45d2-9e84-64626b9e7409"></script>
 
+  <!-- Theme & Language Initialization: Anti-FOUC & Cross-Subdomain Sync -->
+  <script>
+    (function() {
+      function getSharedCookie(name) {
+        var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      var theme = getSharedCookie('pacebowl-theme') || localStorage.getItem('pacebowl-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
+
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html">
   <meta property="og:title" content="The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Buckets)">
   <meta property="og:description" content="Avoid anatomical distortions by setting correct 1MP resolution buckets in ComfyUI for Flux.1 and SDXL.">
 
-  <!-- Schema.org JSON-LD -->
+  <!-- Structured Data: TechArticle, FAQPage & Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -101,67 +123,101 @@
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0284c7', 600: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    html.dark ::-webkit-scrollbar-track { background: #0f172a; }
+    html.dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    html.light ::-webkit-scrollbar-track { background: #f8fafc; }
+    html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
 </head>
-<body class="bg-[#07090e] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-[#07090e] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-200">
 
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#07090e]/80 backdrop-blur sticky top-0 z-50 transition-colors duration-200">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center space-x-2">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
         </div>
-        <span class="font-bold text-base text-white tracking-tight">PaceBowl <span class="text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-500/30">ComfyUI</span></span>
+        <span class="font-bold text-base text-slate-900 dark:text-white tracking-tight">PaceBowl <span class="text-sky-600 dark:text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-500/30">ComfyUI</span></span>
       </a>
-      <div class="flex items-center space-x-4 text-xs">
-        <a href="/blog/" class="text-slate-400 hover:text-slate-200 transition">← Back to Blog</a>
-        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 transition">Launch Calculator</a>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle English / 简体中文">
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="lang-label" class="font-semibold font-mono text-[11px]">中文</span>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle Light / Dark mode">
+          <svg id="theme-sun-icon" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <a href="/blog/" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="back_blog">← Back to Blog</a>
+        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 transition" data-i18n="launch_btn">Launch Calculator</a>
       </div>
     </div>
   </header>
 
-  <!-- Article -->
-  <article class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
+  <!-- ========================================== -->
+  <!-- ENGLISH VERSION -->
+  <!-- ========================================== -->
+  <article id="article-en" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
     <!-- Breadcrumbs -->
     <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
-      <a href="/" class="hover:text-slate-300">Home</a>
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">Home</a>
       <span>/</span>
-      <a href="/blog/" class="hover:text-slate-300">Blog</a>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">Blog</a>
       <span>/</span>
-      <span class="text-sky-400">Latent Resolution Guide</span>
+      <span class="text-sky-600 dark:text-sky-400">Latent Resolution Guide</span>
     </nav>
 
     <!-- Header -->
-    <header class="mb-10 pb-8 border-b border-slate-800">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
         The Ultimate ComfyUI Empty Latent Resolution Guide (1MP Aspect Ratio Buckets)
       </h1>
-      <div class="flex items-center space-x-4 text-xs text-slate-400">
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
         <span>By PaceBowl Research Team</span>
         <span>•</span>
         <span>Updated September 2026</span>
         <span>•</span>
-        <span class="px-2 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-500/30 font-mono">5 min read</span>
+        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 font-mono">5 min read</span>
       </div>
     </header>
 
     <!-- In-Article Banner CTA -->
-    <div class="my-6 p-4 rounded-xl bg-sky-950/30 border border-sky-500/30 flex items-center justify-between text-xs">
+    <div class="my-6 p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 flex items-center justify-between text-xs">
       <div>
-        <span class="font-bold text-sky-200">Need instant Empty Latent dimensions?</span>
-        <div class="text-slate-400 text-[11px] mt-0.5">Use our free visual calculator to click any ratio (16:9, 9:16, 21:9) and copy values in 1 click.</div>
+        <span class="font-bold text-sky-900 dark:text-sky-200">Need instant Empty Latent dimensions?</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">Use our free visual calculator to click any ratio (16:9, 9:16, 21:9) and copy values in 1 click.</div>
       </div>
       <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">Open Calculator →</a>
     </div>
 
     <!-- Body -->
-    <div class="space-y-6 text-slate-300 text-sm leading-relaxed">
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
       <!-- AEO Direct Answer Box -->
-      <div class="p-4 rounded-xl bg-slate-900/90 border border-sky-500/40 shadow-lg text-xs space-y-2">
-        <div class="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-sky-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider text-[11px]">
           <span>⚡ Direct Answer (TL;DR)</span>
         </div>
-        <p class="text-slate-300 leading-relaxed">
+        <p class="leading-relaxed">
           <strong>Never enter raw screen sizes (like 1920x1080) into ComfyUI Empty Latent Image.</strong> Flux.1 and SDXL are trained on <strong>1.0 Megapixel buckets (~1,048,576 pixels)</strong> with dimensions strictly divisible by <strong>64</strong> to match VAE 8x downsampling. Use calibrated buckets like <strong>1024×1024 (1:1)</strong>, <strong>1344×768 (16:9)</strong>, or <strong>896×1152 (3:4)</strong> to completely eliminate duplicate heads, stretched limbs, and VAE decoding edge artifacts.
         </p>
       </div>
@@ -173,7 +229,7 @@
         The generation completes, but the image is plagued with deformed figures, dual torsos, or duplicate heads. In this guide, we break down why this happens and give you the exact resolution lookup table trained into modern foundation models like <strong>Flux.1</strong> and <strong>SDXL</strong>.
       </p>
 
-      <h2 class="text-xl font-bold text-white pt-4">The Science Behind "Aspect Ratio Bucketing"</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">The Science Behind "Aspect Ratio Bucketing"</h2>
       <p>
         During pre-training, diffusion models are not fed arbitrary screen sizes. Black Forest Labs (for Flux.1) and Stability AI (for SDXL) trained their models using <strong>aspect ratio bucketing</strong>.
       </p>
@@ -184,17 +240,17 @@
         When you feed an uncalibrated resolution like 1920x1080 (which is 2.07 Megapixels, double the native capacity), the model's self-attention layers perceive excessive canvas space. Having no concept of a 2MP single scene, the diffusion process attempts to tile two 1MP concepts side-by-side—spawning duplicate bodies or repeating horizon lines.
       </p>
 
-      <!-- New Section: The VAE 64-Aligned Rule -->
-      <h2 class="text-xl font-bold text-white pt-4">The VAE 64-Aligned Rule: Why Arbitrary Multiples Cause Green Lines</h2>
+      <!-- The VAE 64-Aligned Rule -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">The VAE 64-Aligned Rule: Why Arbitrary Multiples Cause Green Lines</h2>
       <p>
         In modern diffusion pipelines, image generation does not happen in RGB pixel space—it occurs in the latent space managed by the <strong>Variational Autoencoder (VAE)</strong>. The VAE compresses an image by an 8×8 factor (spatial downsampling).
       </p>
       <p>
-        If your width or height is not a multiple of 64, latent patchification causes pixel remainder clipping during decoding. This manifests as faint green or pink border lines along the right and bottom edges, or subtle blurring artifacts. In our <a href="https://comfy.pacebowl.com" class="text-sky-400 underline">ComfyUI Prompt Studio</a>, the calculator automatically runs a <code>w % 64 === 0 && h % 64 === 0</code> validation test to guarantee safe VAE alignment.
+        If your width or height is not a multiple of 64, latent patchification causes pixel remainder clipping during decoding. This manifests as faint green or pink border lines along the right and bottom edges, or subtle blurring artifacts. In our <a href="https://comfy.pacebowl.com" class="text-sky-600 dark:text-sky-400 underline">ComfyUI Prompt Studio</a>, the calculator automatically runs a <code>w % 64 === 0 && h % 64 === 0</code> validation test to guarantee safe VAE alignment.
       </p>
 
-      <!-- New Section: 1-Click Native Node Copy -->
-      <h2 class="text-xl font-bold text-white pt-4">Instant Workflow Injection: Native ComfyUI Canvas Paste (Ctrl+V)</h2>
+      <!-- 1-Click Native Node Copy -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">Instant Workflow Injection: Native ComfyUI Canvas Paste (Ctrl+V)</h2>
       <p>
         Manually typing width and height into ComfyUI nodes is tedious and error-prone. Modern ComfyUI supports pasting serialized node objects directly onto the web canvas.
       </p>
@@ -202,7 +258,7 @@
         In PaceBowl ComfyUI Studio, clicking <strong>"Copy EmptyLatent Node (Canvas Ctrl+V)"</strong> copies the official LiteGraph node JSON into your clipboard:
       </p>
 
-      <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-sky-300 overflow-x-auto"><code>{
+      <pre class="bg-slate-900 text-sky-200 dark:bg-slate-950 p-4 rounded-xl border border-slate-300 dark:border-slate-800 font-mono text-xs overflow-x-auto"><code>{
   "nodes": [{
     "type": "EmptyLatentImage",
     "widgets_values": [1344, 768, 1]
@@ -212,118 +268,461 @@
         Simply open your ComfyUI browser tab and press <strong>Ctrl+V</strong> anywhere on the blank canvas. The node instantly appears with your calibrated 1MP dimensions pre-filled!
       </p>
 
-      <h2 class="text-xl font-bold text-white pt-4">Complete 1MP Resolution Lookup Table</h2>
-      <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60 my-4">
-        <table class="w-full text-left text-xs text-slate-300">
-          <thead class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase font-semibold">
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">Complete 1MP Resolution Lookup Table</h2>
+      <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 my-4 shadow-sm">
+        <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+          <thead class="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase font-semibold">
             <tr>
               <th class="py-3 px-4">Aspect Ratio</th>
-              <th class="py-3 px-4 text-sky-400">Width × Height</th>
+              <th class="py-3 px-4 text-sky-600 dark:text-sky-400">Width × Height</th>
               <th class="py-3 px-4">Total Pixels</th>
               <th class="py-3 px-4">Best Used For</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60">
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">1:1 Square</td>
-              <td class="py-3 px-4 font-mono text-sky-300">1024 × 1024</td>
-              <td class="py-3 px-4 text-slate-400">1,048,576 (1.05 MP)</td>
-              <td class="py-3 px-4 text-slate-400">Avatars, album covers, Instagram grid</td>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800/60">
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">1:1 Square</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1024 × 1024</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,048,576 (1.05 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">Avatars, album covers, Instagram grid</td>
             </tr>
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">16:9 Landscape</td>
-              <td class="py-3 px-4 font-mono text-sky-300">1344 × 768</td>
-              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
-              <td class="py-3 px-4 text-slate-400">Desktop wallpapers, YouTube thumbnails, landscapes</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">16:9 Landscape</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1344 × 768</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">Desktop wallpapers, YouTube thumbnails, landscapes</td>
             </tr>
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">9:16 Portrait</td>
-              <td class="py-3 px-4 font-mono text-sky-300">768 × 1344</td>
-              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
-              <td class="py-3 px-4 text-slate-400">TikTok, Instagram Reels, smartphone wallpapers</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">9:16 Portrait</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">768 × 1344</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">TikTok, Instagram Reels, smartphone wallpapers</td>
             </tr>
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">4:3 Standard</td>
-              <td class="py-3 px-4 font-mono text-sky-300">1152 × 896</td>
-              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
-              <td class="py-3 px-4 text-slate-400">Editorial photography, retro TV aesthetic</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">4:3 Standard</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1152 × 896</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">Editorial photography, retro TV aesthetic</td>
             </tr>
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">3:4 Portrait</td>
-              <td class="py-3 px-4 font-mono text-sky-300">896 × 1152</td>
-              <td class="py-3 px-4 text-slate-400">1,032,192 (1.03 MP)</td>
-              <td class="py-3 px-4 text-slate-400">Fashion model portraits, poster prints</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">3:4 Portrait</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">896 × 1152</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">Fashion model portraits, poster prints</td>
             </tr>
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">21:9 Ultra-Wide</td>
-              <td class="py-3 px-4 font-mono text-sky-300">1536 × 640</td>
-              <td class="py-3 px-4 text-slate-400">983,040 (0.98 MP)</td>
-              <td class="py-3 px-4 text-slate-400">Cinematic anamorphic film stills</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">21:9 Ultra-Wide</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1536 × 640</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">983,040 (0.98 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">Cinematic anamorphic film stills</td>
             </tr>
-            <tr class="hover:bg-slate-900/30">
-              <td class="py-3 px-4 font-bold text-white">3:2 Classic Photo</td>
-              <td class="py-3 px-4 font-mono text-sky-300">1216 × 832</td>
-              <td class="py-3 px-4 text-slate-400">1,011,712 (1.01 MP)</td>
-              <td class="py-3 px-4 text-slate-400">Standard 35mm DSLR landscape</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">3:2 Classic Photo</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1216 × 832</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,011,712 (1.01 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">Standard 35mm DSLR landscape</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2 class="text-xl font-bold text-white pt-4">How to Upscale to 4K Properly</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">How to Upscale to 4K Properly</h2>
       <p>
         If your end goal is a crisp 4K wallpaper (3840×2160), <strong>do not generate at 4K in Empty Latent</strong>. The correct ComfyUI workflow pipeline is:
       </p>
-      <ol class="list-decimal pl-5 space-y-2 text-slate-400">
+      <ol class="list-decimal pl-5 space-y-2 text-slate-600 dark:text-slate-400">
         <li>Generate the base composition at <strong>1344×768</strong> in Empty Latent Image.</li>
         <li>Pass the decoded VAE output through an <strong>Upscale Model Loader</strong> (using models like <code>4x-UltraSharp</code> or <code>4x_NMKD-Superscale</code>).</li>
         <li>(Optional) Perform a gentle second-pass <strong>KSampler (Inpainting/Hires fix)</strong> with a low denoise value between <code>0.25</code> and <code>0.35</code> to sharpen fine textures without altering the core scene composition.</li>
       </ol>
 
       <!-- Semantic FAQ Section for AEO -->
-      <h2 class="text-xl font-bold text-white pt-6">Frequently Asked Questions (AEO Reference)</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-6">Frequently Asked Questions (AEO Reference)</h2>
       <div class="space-y-4 pt-2">
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <h3 class="font-bold text-white text-xs mb-1">Why do arbitrary resolutions like 1920x1080 cause distortions in ComfyUI?</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Why do arbitrary resolutions like 1920x1080 cause distortions in ComfyUI?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
             Diffusion foundation models (Flux.1 and SDXL) are trained on discrete 1.0 megapixel buckets (~1,048,576 pixels). Using arbitrary resolutions forces the model outside its trained latent distribution, causing duplicate heads, anatomical deformities, and VRAM memory spikes.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <h3 class="font-bold text-white text-xs mb-1">Why must ComfyUI Empty Latent resolutions be divisible by 64?</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Why must ComfyUI Empty Latent resolutions be divisible by 64?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
             ComfyUI VAE encoders and decoders compress image pixels by an 8x spatial downsampling factor. During patchification and latent decoding, non-64 multiples can trigger misalignment, green edge lines, and decoding tensor artifacts.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <h3 class="font-bold text-white text-xs mb-1">How to paste an EmptyLatentImage node directly onto ComfyUI canvas without typing?</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">
-            <a href="https://comfy.pacebowl.com" class="text-sky-400 underline">PaceBowl ComfyUI Studio</a> provides a 'Copy EmptyLatent Node (Canvas Ctrl+V)' button. Clicking it serializes the LiteGraph node JSON into your clipboard. Switch to your ComfyUI browser tab and press Ctrl+V to paste the pre-configured node immediately.
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">How to paste an EmptyLatentImage node directly onto ComfyUI canvas without typing?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            <a href="https://comfy.pacebowl.com" class="text-sky-600 dark:text-sky-400 underline">PaceBowl ComfyUI Studio</a> provides a 'Copy EmptyLatent Node (Canvas Ctrl+V)' button. Clicking it serializes the LiteGraph node JSON into your clipboard. Switch to your ComfyUI browser tab and press Ctrl+V to paste the pre-configured node immediately.
           </p>
         </div>
       </div>
     </div>
 
     <!-- Bottom CTA -->
-    <div class="mt-12 p-6 rounded-2xl bg-slate-900 border border-sky-500/30 text-center">
-      <h3 class="text-lg font-bold text-white mb-2">Try the Interactive Latent Calculator</h3>
-      <p class="text-slate-400 text-xs mb-4">Click any ratio button to instantly copy dimensions or JSON directly into your ComfyUI workflow.</p>
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Try the Interactive Latent Calculator</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">Click any ratio button to instantly copy dimensions or JSON directly into your ComfyUI workflow.</p>
       <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
         Open PaceBowl Calculator →
       </a>
     </div>
   </article>
 
+  <!-- ========================================== -->
+  <!-- CHINESE VERSION -->
+  <!-- ========================================== -->
+  <article id="article-zh" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">首页</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">博客</a>
+      <span>/</span>
+      <span class="text-sky-600 dark:text-sky-400">Latent 空潜空间分辨率终极指南</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+        ComfyUI Empty Latent 空潜空间分辨率终极指南（100万像素标准桶与 VAE 64 对齐法则）
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+        <span>PaceBowl 研发团队</span>
+        <span>•</span>
+        <span>2026年9月更新</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 font-mono">阅读用时 5 分钟</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-sky-900 dark:text-sky-200">需要即时换算各比例的标准 Latent 宽高？</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">使用免费可视化计算器，一键点击常用比例（16:9、9:16、21:9）直接复制尺寸或画布节点。</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">打开分辨率计算器 →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+      <!-- AEO Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-sky-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ 核心结论 / 直答概要 (TL;DR)</span>
+        </div>
+        <p class="leading-relaxed">
+          <strong>切勿在 ComfyUI 的 Empty Latent Image 节点中直接填入普通显示器分辨率（如 1920×1080）！</strong> 现代扩散基座模型（Flux.1 与 SDXL）均在 <strong>100 万像素（约 1,048,576 像素）标准桶</strong> 上进行严格预训练，且长宽必须严格整除 <strong>64</strong>（匹配 VAE 8 倍空间下采样）。请务必使用校准后的标准桶尺寸，如 <strong>1024×1024 (1:1)</strong>、<strong>1344×768 (16:9)</strong> 或 <strong>896×1152 (3:4)</strong>，从根本上杜绝人物双头多肢畸变和 VAE 解码边缘绿线。
+        </p>
+      </div>
+
+      <p>
+        许多从 Midjourney、WebUI 转向 ComfyUI 的创作者最常犯的一个典型错误，就是在 <strong>Empty Latent Image</strong> 节点的 Width 和 Height 输入框中，直接填入熟悉的视频分辨率 <code>1920</code> 与 <code>1080</code>。
+      </p>
+      <p>
+        生成渲染虽然能够跑完，但画面却频频出现双头人物、多余手臂、躯干断层或断裂的地平线。本文将从底层架构拆解这一现象的技术根源，并提供 Flux.1 与 SDXL 模型官方训练所采纳的完整分辨率分桶速查表。
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">长宽比分桶机制（Aspect Ratio Bucketing）的技术原理</h2>
+      <p>
+        在基础模型预训练阶段，图像数据并不是以任意尺寸喂入模型的。无论是开发 Flux.1 的 Black Forest Labs 还是 SDXL 的 Stability AI，均采用了严格的 <strong>Aspect Ratio Bucketing（长宽比分桶策略）</strong>。
+      </p>
+      <p>
+        每一个预设桶的总像素面积均严格锚定在约 <strong>1,048,576 像素（1.0 Megapixel）</strong>，并且两个维度的像素值均能够被 64（或 16）整除，以精确匹配 VAE 潜空间压缩比。
+      </p>
+      <p>
+        当你在 Empty Latent 中填入未经校准的 1920×1080（总像素达 207 万，超过模型训练容量整整一倍）时，模型的自注意力机制（Self-Attention）会感知到异常宽阔的潜空间画布。在缺乏“单场景 200 万像素连续语义”训练先验的情况下，去噪扩散过程会自动将两个并列的 100 万像素概念平铺在画布上——于是不可避免地催生出“双人同构”或“多肢体畸变”。
+      </p>
+
+      <!-- The VAE 64-Aligned Rule -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">VAE 64 整除法则：为什么随意数字会导致边缘绿线与伪影</h2>
+      <p>
+        在现代生成扩散流水线中，去噪计算并非在 RGB 原始像素空间进行，而是在由 <strong>变分自编码器（VAE）</strong> 压缩映射后的低维潜空间（Latent Space）中发生。VAE 的空间下采样系数通常为 8×8。
+      </p>
+      <p>
+        如果设置的宽度或高度不是 64 的整数倍，在经过 Patchify 分块与 Latent 解码还原时就会产生余数截断。这会导致渲染成品的最右侧或最底部出现淡淡的绿色或粉色条纹，或者局部的模糊条纹。在 <a href="https://comfy.pacebowl.com" class="text-sky-600 dark:text-sky-400 underline">PaceBowl ComfyUI Studio</a> 中，分辨率计算器已内置 <code>w % 64 === 0 && h % 64 === 0</code> 的自动化合规校验。
+      </p>
+
+      <!-- 1-Click Native Node Copy -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">革命性工作流体验：原生画布一键粘贴节点（Ctrl+V）</h2>
+      <p>
+        每次手动在 ComfyUI 节点中敲键盘输入宽和高既繁琐又极易输错。现代版本的 ComfyUI 已原生支持从系统剪贴板直接向画布粘贴序列化节点。
+      </p>
+      <p>
+        在 PaceBowl Studio 中，只要点击 <strong>“复制 EmptyLatent 节点 (画布 Ctrl+V)”</strong>，系统便会将标准合规的 LiteGraph 节点 JSON 注入剪切板：
+      </p>
+
+      <pre class="bg-slate-900 text-sky-200 dark:bg-slate-950 p-4 rounded-xl border border-slate-300 dark:border-slate-800 font-mono text-xs overflow-x-auto"><code>{
+  "nodes": [{
+    "type": "EmptyLatentImage",
+    "widgets_values": [1344, 768, 1]
+  }]
+}</code></pre>
+      <p>
+        切换到您的 ComfyUI 浏览器窗口，在画布空白处直接按下 <strong>Ctrl+V</strong>，一个预先填好 1MP 标准黄金尺寸的 EmptyLatentImage 节点便会瞬间在鼠标位置生成！
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">完整 100 万像素（1MP）标准分辨率黄金速查表</h2>
+      <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 my-4 shadow-sm">
+        <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+          <thead class="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase font-semibold">
+            <tr>
+              <th class="py-3 px-4">画面比例</th>
+              <th class="py-3 px-4 text-sky-600 dark:text-sky-400">宽 × 高 (Width × Height)</th>
+              <th class="py-3 px-4">总像素数</th>
+              <th class="py-3 px-4">最佳应用场景</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800/60">
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">1:1 正方形</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1024 × 1024</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,048,576 (1.05 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">头像、唱片封面、微信小红书方形配图</td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">16:9 横版宽屏</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1344 × 768</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">电脑桌面壁纸、B站/YouTube 视频封面、大场景风光</td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">9:16 竖版全屏</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">768 × 1344</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">抖音/TikTok 短视频、手机全屏壁纸、故事配图</td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">4:3 标准横版</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1152 × 896</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">杂志插图、复古电视美学、经典人文纪实摄影</td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">3:4 经典竖版</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">896 × 1152</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,032,192 (1.03 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">小红书主图、时尚模特人像、海报印刷设计</td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">21:9 电影宽画幅</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1536 × 640</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">983,040 (0.98 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">电影变形宽银幕电影剧照、超宽带鱼屏壁纸</td>
+            </tr>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30">
+              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">3:2 传统单反画幅</td>
+              <td class="py-3 px-4 font-mono text-sky-600 dark:text-sky-300">1216 × 832</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">1,011,712 (1.01 MP)</td>
+              <td class="py-3 px-4 text-slate-500 dark:text-slate-400">全画幅 35mm 相机原生比例、摄影画册</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">如何正确将出图放大至 4K（3840×2160）高清质感</h2>
+      <p>
+        如果您的目标产物是纤毫毕现的 4K 超高清壁纸，<strong>切记千万不能直接在 Empty Latent 设定为 4K 尺寸</strong>。科学规范的 ComfyUI 工作流管道应该是：
+      </p>
+      <ol class="list-decimal pl-5 space-y-2 text-slate-600 dark:text-slate-400">
+        <li>首先在 Empty Latent Image 中以 <strong>1344×768 (16:9)</strong> 生成基底无畸变图像。</li>
+        <li>将 VAE 解码出的清晰像素图送入 <strong>Upscale Model Loader</strong> 超分放大节点（建议搭配 <code>4x-UltraSharp</code> 或 <code>4x_NMKD-Superscale</code> 权重模型）。</li>
+        <li>（可选进阶）使用低重绘系数（Denoise 介于 <code>0.25</code> 至 <code>0.35</code>）的二阶 <strong>KSampler (高清修复 Hires Fix)</strong> 进行局部重绘精修，在不破坏原场景构图的前提下补足毛发与微观物理细节。</li>
+      </ol>
+
+      <!-- Semantic FAQ Section for AEO -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-6">常见问题解答 (AEO 语义问答索引)</h2>
+      <div class="space-y-4 pt-2">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">为什么随意输入如 1920x1080 会导致 ComfyUI 画面严重畸变？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            扩散基座模型（Flux.1 与 SDXL）是在固定的 100 万像素（约 1,048,576 像素）桶集中完成预训练的。强行输入超额未对齐的任意分辨率会超出模型潜空间感知分布，从而诱发注意力机制并排拼接画面，产生多头、畸形肢体与显存暴涨。
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">为什么 ComfyUI Empty Latent 的宽高必须整除 64？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            ComfyUI VAE 编解码器以 8 倍空间因数进行下采样。在分块切片与潜空间重建中，若长宽无法被 64 整除，解码张量就会产生边界余数对齐偏差，导致成品边缘出现绿线、粉线或条纹伪影。
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">如何无需手动敲键盘直接将 EmptyLatentImage 节点复制到 ComfyUI 画布？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            在 <a href="https://comfy.pacebowl.com" class="text-sky-600 dark:text-sky-400 underline">PaceBowl ComfyUI Studio</a> 中，点击“复制 EmptyLatent 节点 (画布 Ctrl+V)”即可将标准节点 JSON 拷贝至剪贴板。切回 ComfyUI 浏览器窗口直接按 Ctrl+V 即可瞬间贴入预设好尺寸的节点。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">体验交互式 Latent 分辨率计算器</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">一键点击任意预设比例，瞬间将黄金尺寸数值或节点 JSON 复制至您的生产流程中。</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
+        打开 PaceBowl 计算器 →
+      </a>
+    </div>
+  </article>
+
   <!-- Footer -->
-  <footer class="border-t border-slate-800/80 bg-[#07090e] py-8 text-center text-xs text-slate-500">
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-[#07090e] py-8 text-center text-xs text-slate-500 transition-colors duration-200">
     <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <span>PaceBowl &copy; 2026.</span>
-      <div class="flex items-center space-x-6 text-slate-400">
-        <a href="/" class="hover:text-slate-200 transition">Studio</a>
-        <a href="/blog/" class="hover:text-slate-200 transition">Blog</a>
+      <div class="flex items-center space-x-6 text-slate-600 dark:text-slate-400">
+        <a href="/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_studio">Studio</a>
+        <a href="/blog/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_blog">Blog</a>
       </div>
     </div>
   </footer>
 
+  <!-- Theme & Language Switcher Logic with Cross-Subdomain Cookie Sync -->
+  <script>
+    const I18N = {
+      en: {
+        back_blog: '← Back to Blog',
+        launch_btn: 'Launch Calculator',
+        footer_studio: 'Studio',
+        footer_blog: 'Blog'
+      },
+      zh: {
+        back_blog: '← 返回博客列表',
+        launch_btn: '打开计算器',
+        footer_studio: '工作台',
+        footer_blog: '精选博客'
+      }
+    };
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function setSharedState(name, value) {
+      try {
+        localStorage.setItem(name, value);
+      } catch (e) {}
+
+      const hostParts = window.location.hostname.split('.');
+      let rootDomain = '';
+      if (hostParts.length >= 2) {
+        rootDomain = '.' + hostParts.slice(-2).join('.');
+      }
+      const cookieDomain = rootDomain ? '; domain=' + rootDomain : '';
+      document.cookie = name + '=' + encodeURIComponent(value) + '; path=/' + cookieDomain + '; max-age=31536000; SameSite=Lax';
+    }
+
+    function getSharedTheme() {
+      const cookie = getCookie('pacebowl-theme');
+      if (cookie === 'light' || cookie === 'dark') return cookie;
+      const ls = localStorage.getItem('pacebowl-theme');
+      if (ls === 'light' || ls === 'dark') return ls;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function getSharedLang() {
+      const cookie = getCookie('pacebowl-lang');
+      if (cookie === 'zh' || cookie === 'en') return cookie;
+      const ls = localStorage.getItem('pacebowl-lang');
+      if (ls === 'zh' || ls === 'en') return ls;
+      return (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+    }
+
+    let currentLang = getSharedLang();
+
+    function updateThemeUI(isDark) {
+      const sun = document.getElementById('theme-sun-icon');
+      const moon = document.getElementById('theme-moon-icon');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+        } else {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+        }
+      }
+    }
+
+    function applyTheme(isDark, persist) {
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        if (persist) setSharedState('pacebowl-theme', 'dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        if (persist) setSharedState('pacebowl-theme', 'light');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark, true);
+    }
+
+    function updateLanguageUI() {
+      const label = document.getElementById('lang-label');
+      if (label) {
+        label.textContent = currentLang === 'zh' ? 'EN' : '中文';
+      }
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+      const artEn = document.getElementById('article-en');
+      const artZh = document.getElementById('article-zh');
+      if (currentLang === 'zh') {
+        artEn.classList.add('hidden');
+        artZh.classList.remove('hidden');
+      } else {
+        artZh.classList.add('hidden');
+        artEn.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+          el.innerHTML = I18N[currentLang][key];
+        }
+      });
+    }
+
+    function applyLanguage(lang, persist) {
+      currentLang = lang;
+      if (persist) setSharedState('pacebowl-lang', lang);
+      updateLanguageUI();
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage(nextLang, true);
+    }
+
+    function checkCrossDomainSync() {
+      const desiredTheme = getSharedTheme();
+      const isDarkCurrent = document.documentElement.classList.contains('dark');
+      if ((desiredTheme === 'dark') !== isDarkCurrent) {
+        applyTheme(desiredTheme === 'dark', false);
+      }
+      const desiredLang = getSharedLang();
+      if (desiredLang !== currentLang) {
+        applyLanguage(desiredLang, false);
+      }
+    }
+
+    window.addEventListener('pageshow', checkCrossDomainSync);
+    window.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkCrossDomainSync();
+    });
+    window.addEventListener('storage', checkCrossDomainSync);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const theme = getSharedTheme();
+      applyTheme(theme === 'dark', false);
+      applyLanguage(getSharedLang(), false);
+    });
+  </script>
 </body>
 </html>

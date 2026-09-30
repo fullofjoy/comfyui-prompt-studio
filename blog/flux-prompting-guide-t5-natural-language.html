@@ -17,13 +17,35 @@
   <!-- Umami Analytics -->
   <script defer src="https://umami-ruby-alpha-96.vercel.app/script.js" data-website-id="f19f74d0-d931-45d2-9e84-64626b9e7409"></script>
 
+  <!-- Theme & Language Initialization: Anti-FOUC & Cross-Subdomain Sync -->
+  <script>
+    (function() {
+      function getSharedCookie(name) {
+        var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      var theme = getSharedCookie('pacebowl-theme') || localStorage.getItem('pacebowl-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
+
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://comfy.pacebowl.com/blog/flux-prompting-guide-t5-natural-language.html">
   <meta property="og:title" content="Flux.1 Prompt Engineering Guide: Why Natural Language Destroys Comma Tags">
   <meta property="og:description" content="Complete guide to crafting natural language paragraphs for Flux.1 T5 text encoder in ComfyUI.">
 
-  <!-- Schema.org JSON-LD -->
+  <!-- Structured Data: TechArticle, FAQPage & Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -101,67 +123,101 @@
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0284c7', 600: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    html.dark ::-webkit-scrollbar-track { background: #0f172a; }
+    html.dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    html.light ::-webkit-scrollbar-track { background: #f8fafc; }
+    html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
 </head>
-<body class="bg-[#07090e] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-[#07090e] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-200">
 
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#07090e]/80 backdrop-blur sticky top-0 z-50 transition-colors duration-200">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center space-x-2">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
         </div>
-        <span class="font-bold text-base text-white tracking-tight">PaceBowl <span class="text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-500/30">ComfyUI</span></span>
+        <span class="font-bold text-base text-slate-900 dark:text-white tracking-tight">PaceBowl <span class="text-sky-600 dark:text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-500/30">ComfyUI</span></span>
       </a>
-      <div class="flex items-center space-x-4 text-xs">
-        <a href="/blog/" class="text-slate-400 hover:text-slate-200 transition">← Back to Blog</a>
-        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 transition">Launch Studio</a>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle English / 简体中文">
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="lang-label" class="font-semibold font-mono text-[11px]">中文</span>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle Light / Dark mode">
+          <svg id="theme-sun-icon" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <a href="/blog/" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="back_blog">← Back to Blog</a>
+        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 transition" data-i18n="launch_btn">Launch Studio</a>
       </div>
     </div>
   </header>
 
-  <!-- Article -->
-  <article class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
+  <!-- ========================================== -->
+  <!-- ENGLISH VERSION -->
+  <!-- ========================================== -->
+  <article id="article-en" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
     <!-- Breadcrumbs -->
     <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
-      <a href="/" class="hover:text-slate-300">Home</a>
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">Home</a>
       <span>/</span>
-      <a href="/blog/" class="hover:text-slate-300">Blog</a>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">Blog</a>
       <span>/</span>
-      <span class="text-sky-400">Flux Prompting Guide</span>
+      <span class="text-sky-600 dark:text-sky-400">Flux Prompting Guide</span>
     </nav>
 
     <!-- Header -->
-    <header class="mb-10 pb-8 border-b border-slate-800">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
         Flux.1 Prompt Engineering Guide: Why Natural Language Destroys Comma Tags
       </h1>
-      <div class="flex items-center space-x-4 text-xs text-slate-400">
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
         <span>By PaceBowl Research Team</span>
         <span>•</span>
         <span>Updated September 2026</span>
         <span>•</span>
-        <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 font-mono">7 min read</span>
+        <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-mono">7 min read</span>
       </div>
     </header>
 
     <!-- In-Article Banner CTA -->
-    <div class="my-6 p-4 rounded-xl bg-sky-950/30 border border-sky-500/30 flex items-center justify-between text-xs">
+    <div class="my-6 p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 flex items-center justify-between text-xs">
       <div>
-        <span class="font-bold text-sky-200">Want to generate structured Flux paragraphs automatically?</span>
-        <div class="text-slate-400 text-[11px] mt-0.5">Use our free visual studio to assemble camera, lighting, and narrative prompts in seconds.</div>
+        <span class="font-bold text-sky-900 dark:text-sky-200">Want to generate structured Flux paragraphs automatically?</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">Use our free visual studio to assemble camera, lighting, and narrative prompts in seconds.</div>
       </div>
       <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">Open Studio →</a>
     </div>
 
     <!-- Body -->
-    <div class="space-y-6 text-slate-300 text-sm leading-relaxed">
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
       <!-- AEO Direct Answer Box -->
-      <div class="p-4 rounded-xl bg-slate-900/90 border border-sky-500/40 shadow-lg text-xs space-y-2">
-        <div class="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-sky-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider text-[11px]">
           <span>⚡ Direct Answer (TL;DR)</span>
         </div>
-        <p class="text-slate-300 leading-relaxed">
+        <p class="leading-relaxed">
           <strong>Do not use comma-separated tags (like 'masterpiece, 8k') in Flux.1.</strong> Flux uses the <strong>T5-XXL language model encoder</strong>, which reads full sentences and understands grammar, prepositions, and camera physics. Structure prompts into <strong>2–3 complete descriptive sentences</strong> detailing subject actions, environment, lighting, optics, and surface textures. Leave the <strong>Negative conditioning node unplugged</strong> in ComfyUI.
         </p>
       </div>
@@ -170,59 +226,59 @@
         The release of <strong>Flux.1</strong> by Black Forest Labs marked the biggest generational leap in open-source AI image generation since Stable Diffusion 1.5. However, thousands of creators still prompt Flux as if it were SD 1.5, pasting long strings of comma-separated "quality tags" like:
       </p>
 
-      <pre class="bg-rose-950/20 p-3 rounded-lg border border-rose-500/30 font-mono text-xs text-rose-300"><code>❌ 1girl, solo, masterpiece, 8k, best quality, highly detailed, beautiful eyes, ray tracing, sharp focus</code></pre>
+      <pre class="bg-rose-50 dark:bg-rose-950/20 p-3 rounded-lg border border-rose-200 dark:border-rose-500/30 font-mono text-xs text-rose-700 dark:text-rose-300"><code>❌ 1girl, solo, masterpiece, 8k, best quality, highly detailed, beautiful eyes, ray tracing, sharp focus</code></pre>
 
       <p>
         In Flux.1, doing this actively degrades your output. Here is the technical explanation of why comma-tagging is obsolete and how to unlock photorealism using descriptive natural language.
       </p>
 
-      <h2 class="text-xl font-bold text-white pt-4">The Architectural Shift: Enter T5-XXL</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">The Architectural Shift: Enter T5-XXL</h2>
       <p>
         Stable Diffusion 1.5 relied solely on OpenAI's <strong>CLIP ViT-L/14</strong> text encoder. CLIP processes text into token embeddings but lacks deep semantic understanding of relationships between subjects, adverbs, and prepositions. As a result, users had to resort to keyword "word salads" and numerical weights like <code>(masterpiece:1.2)</code>.
       </p>
       <p>
         In contrast, Flux.1 incorporates Google's massive <strong>T5-XXL</strong> (Text-to-Text Transfer Transformer). T5 is an actual large language model capable of parsing:
       </p>
-      <ul class="list-disc pl-5 space-y-2 text-slate-400">
+      <ul class="list-disc pl-5 space-y-2 text-slate-600 dark:text-slate-400">
         <li><strong>Spatial relationships:</strong> "holding an umbrella in her left hand while walking past a red telephone booth"</li>
         <li><strong>Complex lighting interactions:</strong> "warm candlelight softly illuminating the contours of his face against a dark wood-paneled study"</li>
         <li><strong>Subtle camera optics:</strong> "shallow depth of field shot on an 85mm f/1.4 lens, creamy bokeh in the background"</li>
       </ul>
 
-      <h2 class="text-xl font-bold text-white pt-4">The 4-Part Formula for High-End Flux Prompts</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">The 4-Part Formula for High-End Flux Prompts</h2>
       <p>
         Instead of stacking random adjectives, structure your prompt as a coherent 2-to-3 sentence narrative following this proven structure:
       </p>
 
       <div class="space-y-3 my-4">
-        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs">
-          <strong class="text-sky-300 block mb-1">1. Subject & Action</strong>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">1. Subject & Action</strong>
           A candid editorial photograph of an elderly blacksmith hammering red-hot steel on an antique anvil.
         </div>
-        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs">
-          <strong class="text-sky-300 block mb-1">2. Environment & Atmospheric Detail</strong>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">2. Environment & Atmospheric Detail</strong>
           The workshop is filled with floating dust motes and hanging iron tools, with stone walls weathered by centuries of smoke.
         </div>
-        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs">
-          <strong class="text-sky-300 block mb-1">3. Lighting & Optics</strong>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">3. Lighting & Optics</strong>
           Illuminated by the fiery orange glow of the furnace casting strong rim highlights. Shot on 35mm lens with authentic analog Kodak Portra 400 film grain.
         </div>
-        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs">
-          <strong class="text-sky-300 block mb-1">4. Micro-Textures & Subsurface Detail</strong>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">4. Micro-Textures & Subsurface Detail</strong>
           Natural skin pores, subtle beads of perspiration on his brow, and delicate translucent subsurface scattering (SSS) along his ears.
         </div>
       </div>
 
-      <!-- New Section: 1-Click Node Copy -->
-      <h2 class="text-xl font-bold text-white pt-4">1-Click CLIPTextEncode Node Copy for ComfyUI Canvas</h2>
+      <!-- 1-Click Node Copy -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">1-Click CLIPTextEncode Node Copy for ComfyUI Canvas</h2>
       <p>
-        Once you've constructed a natural language prompt in <a href="https://comfy.pacebowl.com" class="text-sky-400 underline">PaceBowl ComfyUI Studio</a>, you don't even have to select and paste text. Click <strong>"⚡ Copy Node (Canvas Ctrl+V)"</strong> to copy the fully formed <code>CLIPTextEncode</code> node JSON.
+        Once you've constructed a natural language prompt in <a href="https://comfy.pacebowl.com" class="text-sky-600 dark:text-sky-400 underline">PaceBowl ComfyUI Studio</a>, you don't even have to select and paste text. Click <strong>"⚡ Copy Node (Canvas Ctrl+V)"</strong> to copy the fully formed <code>CLIPTextEncode</code> node JSON.
       </p>
       <p>
         Switch directly to your ComfyUI window and press <strong>Ctrl+V</strong> to spawn the prompt node onto your workspace instantly.
       </p>
 
-      <h2 class="text-xl font-bold text-white pt-4">Why Negative Prompts Are Obsolete in Flux</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">Why Negative Prompts Are Obsolete in Flux</h2>
       <p>
         In vanilla Flux.1 ComfyUI workflows, <strong>you do not need a negative prompt node</strong>.
       </p>
@@ -231,23 +287,23 @@
       </p>
 
       <!-- Semantic FAQ Section for AEO -->
-      <h2 class="text-xl font-bold text-white pt-6">Frequently Asked Questions (Flux Prompting AEO Reference)</h2>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-6">Frequently Asked Questions (Flux Prompting AEO Reference)</h2>
       <div class="space-y-4 pt-2">
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <h3 class="font-bold text-white text-xs mb-1">Why do comma tags like 'masterpiece, 8k, highly detailed' fail on Flux.1?</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Why do comma tags like 'masterpiece, 8k, highly detailed' fail on Flux.1?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
             Flux.1 uses the T5-XXL language model encoder, which was trained on descriptive syntactical prose rather than isolated keyword bags. Tag stuffing dilutes semantic attention and degrades image quality. Write in complete descriptive sentences detailing subjects, optics, and lighting.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <h3 class="font-bold text-white text-xs mb-1">Does Flux.1 need a negative prompt in ComfyUI?</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Does Flux.1 need a negative prompt in ComfyUI?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
             No. Flux.1 Schnell and Dev are flow matching models trained without negative conditioning. In vanilla ComfyUI Flux workflows, leaving the Negative conditioning input unplugged produces cleaner, more natural results without washed-out colors.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <h3 class="font-bold text-white text-xs mb-1">How to write optical and micro-texture details for Flux.1?</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">How to write optical and micro-texture details for Flux.1?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
             Describe optics and texture using realistic photographic terminology, such as "shot on 85mm f/1.4 lens with shallow depth of field", "natural skin pores with subtle subsurface scattering (SSS)", and "analog Kodak Portra 400 film grain".
           </p>
         </div>
@@ -255,25 +311,318 @@
     </div>
 
     <!-- Bottom CTA -->
-    <div class="mt-12 p-6 rounded-2xl bg-slate-900 border border-sky-500/30 text-center">
-      <h3 class="text-lg font-bold text-white mb-2">Build Natural Language Flux Prompts Instantly</h3>
-      <p class="text-slate-400 text-xs mb-4">Select photography optics, lighting conditions, and aesthetic moods with zero GPU memory overhead.</p>
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Build Natural Language Flux Prompts Instantly</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">Select photography optics, lighting conditions, and aesthetic moods with zero GPU memory overhead.</p>
       <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
         Launch PaceBowl Prompt Studio →
       </a>
     </div>
   </article>
 
+  <!-- ========================================== -->
+  <!-- CHINESE VERSION -->
+  <!-- ========================================== -->
+  <article id="article-zh" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">首页</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">博客</a>
+      <span>/</span>
+      <span class="text-sky-600 dark:text-sky-400">Flux 提示词编写实战</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+        Flux.1 提示词编写实战：为什么叙事性自然语言彻底碾压传统逗号标签
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+        <span>PaceBowl 研发团队</span>
+        <span>•</span>
+        <span>2026年9月更新</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-mono">阅读用时 7 分钟</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-sky-900 dark:text-sky-200">想要快速拼接结构化的 Flux 自然语言段落？</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">使用我们免费的可视化工作台，秒级组合镜头光学、光影氛围与叙事细节。</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">打开提示词工作台 →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+      <!-- AEO Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-sky-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ 核心结论 / 直答概要 (TL;DR)</span>
+        </div>
+        <p class="leading-relaxed">
+          <strong>在 Flux.1 中切勿再堆砌逗号分隔的质量词（如“masterpiece, 8k, best quality”）！</strong> Flux 深度集成了 <strong>Google T5-XXL 大语言模型编码器</strong>，能够完整理解语法逻辑、方位介词与光学镜头物理规律。最强提示词范式是撰写 <strong>2 至 3 句完整的描述性连续句子</strong>，精确描述主体动作、宏观环境、光影朝向、镜头焦距与微观物理质感。并且在 ComfyUI 工作流中，<strong>完全无需连接负向提示词节点（Negative Conditioning）</strong>。
+        </p>
+      </div>
+
+      <p>
+        由 Black Forest Labs 推出的 <strong>Flux.1</strong> 是自 Stable Diffusion 1.5 以来开源 AI 图像生成领域最震撼的跨时代跃升。然而，依然有海量创作者沿袭 SD 1.5 时代的陈旧习惯，机械性地向 Flux 输入一长串毫无语义连贯性的逗号标签：
+      </p>
+
+      <pre class="bg-rose-50 dark:bg-rose-950/20 p-3 rounded-lg border border-rose-200 dark:border-rose-500/30 font-mono text-xs text-rose-700 dark:text-rose-300"><code>❌ 1girl, solo, masterpiece, 8k, best quality, highly detailed, beautiful eyes, ray tracing, sharp focus</code></pre>
+
+      <p>
+        在 Flux.1 中，这种堆词做法不仅毫无助益，反而会剧烈稀释注意力和语义权重，使画面丧失真实感。本文将从模型底层架构深度拆解为什么逗号标签已彻底死绝，以及如何用自然语言释放 Flux 的顶级逼真质感。
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">架构革命：T5-XXL 文本编码器的跨代降维打击</h2>
+      <p>
+        传统的 Stable Diffusion 1.5 仅仅依赖 OpenAI 的 <strong>CLIP ViT-L/14</strong> 编码器。CLIP 只能将文本转化为离散的 Token Embedding，对复杂句式结构、修饰主谓宾语以及空间相对位置完全缺乏深层理解。因此用户被迫使用“单词沙拉”和类似 <code>(masterpiece:1.2)</code> 的机械权重语法。
+      </p>
+      <p>
+        而 Flux.1 引入了参数量高达 43 亿的超大语言模型 <strong>T5-XXL</strong>。作为一个货真价实的 LLM，T5 拥有惊人的语言语义解析能力：
+      </p>
+      <ul class="list-disc pl-5 space-y-2 text-slate-600 dark:text-slate-400">
+        <li><strong>精准解析空间位置关系：</strong> “左手撑着黑色雨伞，正缓步经过街角的一座红色复古电话亭”</li>
+        <li><strong>复杂的多光源动态光影：</strong> “温暖的壁炉橙光柔和映照着他右脸的轮廓，背景则是深色实木书房的阴影”</li>
+        <li><strong>微观摄影光学机理：</strong> “使用 85mm f/1.4 大光圈镜头拍摄，景深极浅，背景呈现出如奶油般化开的光斑虚化”</li>
+      </ul>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">打造顶级质感 Flux 提示词的“黄金四段式叙事法”</h2>
+      <p>
+        放弃堆砌空洞形容词，将提示词组织为一段 2 至 3 句话的连贯场景短文，遵循以下经过无数工业级验证的黄金结构：
+      </p>
+
+      <div class="space-y-3 my-4">
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">1. 主体与核心动作（Subject & Action）</strong>
+          一张抓拍纪实风格的杂志大片，一位满头银发的老铁匠正专注地在古旧铁砧上锤打着烧红的炽热钢坯。
+        </div>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">2. 宏观环境与大气氛围（Environment & Atmosphere）</strong>
+          工坊空气中弥漫着漂浮的细微金属尘埃与悬挂的铁制器具，历经数百年烟熏火燎的古老石墙透着岁月沧桑。
+        </div>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">3. 光影交错与摄影光学（Lighting & Optics）</strong>
+          锻炉升腾的熊熊火光勾勒出锋利的侧逆轮廓光。采用 35mm 人文定焦镜头拍摄，带有经典的柯达 Portra 400 胶片颗粒质感。
+        </div>
+        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+          <strong class="text-sky-600 dark:text-sky-300 block mb-1">4. 物理微观质感与次表面散射（Micro-Textures & SSS）</strong>
+          皮肤毛孔真实自然，额头上凝结着微小的汗珠，耳郭边缘透出逼真的半透明次表面散射（Subsurface Scattering）红润光泽。
+        </div>
+      </div>
+
+      <!-- 1-Click Node Copy -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">一键复制 CLIPTextEncode 节点至 ComfyUI 画布（Ctrl+V）</h2>
+      <p>
+        在 <a href="https://comfy.pacebowl.com" class="text-sky-600 dark:text-sky-400 underline">PaceBowl ComfyUI Studio</a> 中组合好自然语言提示词后，您甚至无需划词全选。只需点击 <strong>“⚡ 复制节点 (画布 Ctrl+V)”</strong>，系统便会将标准合规的 <code>CLIPTextEncode</code> 节点 JSON 写入剪贴板。
+      </p>
+      <p>
+        直接切回您的 ComfyUI 标签页按下 <strong>Ctrl+V</strong>，即可在工作区光速生成装载好提示词的完整文本编码节点。
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">为什么在 Flux 中负向提示词（Negative Prompt）彻底过时？</h2>
+      <p>
+        在标准的 Flux.1 ComfyUI 工作流中，<strong>您完全不需要任何负向提示词节点</strong>。
+      </p>
+      <p>
+        Flux 采用的是流匹配（Flow Matching）与矫正流（Rectified Flow）的平直扩散轨迹，而非传统 DDPM 概率噪声衰减。如果您硬生生挂载一个填有“blurry, ugly, deformed”的负向条件节点，会向流场中注入反向向量偏移，往往会无端抹杀掉原画面中精心构想的胶片暗角、意境阴影或丰富色彩饱和度。请在 KSampler 的 Negative 输入端保持空接（Unplugged）。
+      </p>
+
+      <!-- Semantic FAQ Section for AEO -->
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-6">常见问题解答 (Flux 提示词 AEO 语义检索优化)</h2>
+      <div class="space-y-4 pt-2">
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">为什么“masterpiece, 8k, highly detailed”等逗号词在 Flux.1 中完全失效？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Flux.1 搭载的是强大的 T5-XXL 语言模型，其训练语料是富含句法与语境的整句描述，而非零散标签。填入空洞的逗号词会干扰语言模型的注意力分布并损害出图拟真度。请用完整的描述性句子描摹主体、光学与光照。
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Flux.1 在 ComfyUI 中到底需要负向提示词吗？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            不需要。Flux.1 Schnell 与 Dev 均基于流匹配架构训练，原生未做负向条件约束。在原版 ComfyUI 工作流中，将 Negative 引脚留空反而能获得色彩更通透自然、细节更生动逼真的画面。
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">如何在 Flux 提示词中精准描摹光学虚化与微观材质？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            使用正统的摄影与物理光学术语，如“shot on 85mm f/1.4 lens with shallow depth of field（85mm f/1.4 浅景深）”、“natural skin pores with subtle subsurface scattering（自然皮肤毛孔与微弱次表面散射）”和“analog Kodak Portra 400 film grain（胶片颗粒）”。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">秒级生成专业级 Flux 自然语言提示词</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">随意勾选摄影镜头、光影时段与艺术氛围预设，副屏实时预览，零显存开销。</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
+        进入 PaceBowl 提示词工作台 →
+      </a>
+    </div>
+  </article>
+
   <!-- Footer -->
-  <footer class="border-t border-slate-800/80 bg-[#07090e] py-8 text-center text-xs text-slate-500">
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-[#07090e] py-8 text-center text-xs text-slate-500 transition-colors duration-200">
     <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <span>PaceBowl &copy; 2026.</span>
-      <div class="flex items-center space-x-6 text-slate-400">
-        <a href="/" class="hover:text-slate-200 transition">Studio</a>
-        <a href="/blog/" class="hover:text-slate-200 transition">Blog</a>
+      <div class="flex items-center space-x-6 text-slate-600 dark:text-slate-400">
+        <a href="/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_studio">Studio</a>
+        <a href="/blog/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_blog">Blog</a>
       </div>
     </div>
   </footer>
 
+  <!-- Theme & Language Switcher Logic with Cross-Subdomain Cookie Sync -->
+  <script>
+    const I18N = {
+      en: {
+        back_blog: '← Back to Blog',
+        launch_btn: 'Launch Studio',
+        footer_studio: 'Studio',
+        footer_blog: 'Blog'
+      },
+      zh: {
+        back_blog: '← 返回博客列表',
+        launch_btn: '进入工作台',
+        footer_studio: '工作台',
+        footer_blog: '精选博客'
+      }
+    };
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function setSharedState(name, value) {
+      try {
+        localStorage.setItem(name, value);
+      } catch (e) {}
+
+      const hostParts = window.location.hostname.split('.');
+      let rootDomain = '';
+      if (hostParts.length >= 2) {
+        rootDomain = '.' + hostParts.slice(-2).join('.');
+      }
+      const cookieDomain = rootDomain ? '; domain=' + rootDomain : '';
+      document.cookie = name + '=' + encodeURIComponent(value) + '; path=/' + cookieDomain + '; max-age=31536000; SameSite=Lax';
+    }
+
+    function getSharedTheme() {
+      const cookie = getCookie('pacebowl-theme');
+      if (cookie === 'light' || cookie === 'dark') return cookie;
+      const ls = localStorage.getItem('pacebowl-theme');
+      if (ls === 'light' || ls === 'dark') return ls;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function getSharedLang() {
+      const cookie = getCookie('pacebowl-lang');
+      if (cookie === 'zh' || cookie === 'en') return cookie;
+      const ls = localStorage.getItem('pacebowl-lang');
+      if (ls === 'zh' || ls === 'en') return ls;
+      return (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+    }
+
+    let currentLang = getSharedLang();
+
+    function updateThemeUI(isDark) {
+      const sun = document.getElementById('theme-sun-icon');
+      const moon = document.getElementById('theme-moon-icon');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+        } else {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+        }
+      }
+    }
+
+    function applyTheme(isDark, persist) {
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        if (persist) setSharedState('pacebowl-theme', 'dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        if (persist) setSharedState('pacebowl-theme', 'light');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark, true);
+    }
+
+    function updateLanguageUI() {
+      const label = document.getElementById('lang-label');
+      if (label) {
+        label.textContent = currentLang === 'zh' ? 'EN' : '中文';
+      }
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+      const artEn = document.getElementById('article-en');
+      const artZh = document.getElementById('article-zh');
+      if (currentLang === 'zh') {
+        artEn.classList.add('hidden');
+        artZh.classList.remove('hidden');
+      } else {
+        artZh.classList.add('hidden');
+        artEn.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+          el.innerHTML = I18N[currentLang][key];
+        }
+      });
+    }
+
+    function applyLanguage(lang, persist) {
+      currentLang = lang;
+      if (persist) setSharedState('pacebowl-lang', lang);
+      updateLanguageUI();
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage(nextLang, true);
+    }
+
+    function checkCrossDomainSync() {
+      const desiredTheme = getSharedTheme();
+      const isDarkCurrent = document.documentElement.classList.contains('dark');
+      if ((desiredTheme === 'dark') !== isDarkCurrent) {
+        applyTheme(desiredTheme === 'dark', false);
+      }
+      const desiredLang = getSharedLang();
+      if (desiredLang !== currentLang) {
+        applyLanguage(desiredLang, false);
+      }
+    }
+
+    window.addEventListener('pageshow', checkCrossDomainSync);
+    window.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkCrossDomainSync();
+    });
+    window.addEventListener('storage', checkCrossDomainSync);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const theme = getSharedTheme();
+      applyTheme(theme === 'dark', false);
+      applyLanguage(getSharedLang(), false);
+    });
+  </script>
 </body>
 </html>
