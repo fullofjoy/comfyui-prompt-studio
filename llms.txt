@@ -1,12 +1,13 @@
 # PaceBowl - ComfyUI Prompt Studio & Flux.1 Latent Calculator
 
-> The modern web studio for ComfyUI Empty Latent resolution calculation and Flux.1 natural language prompting.
+> The modern web studio for ComfyUI Empty Latent resolution calculation, canvas node injection, and Flux.1 natural language prompting.
 
 ## Overview
-PaceBowl (https://comfy.pacebowl.com/) is an essential browser utility for AI image creators using ComfyUI. It solves two critical bottlenecks:
-1. **Empty Latent Dimension Bucketing**: Calculates exact ~1.0 megapixel trained resolutions (e.g. 1024x1024, 1344x768, 896x1152) to eliminate artifacting and duplicate heads in Flux.1 and SDXL.
-2. **Flux.1 Natural Language Prompt Studio**: Formats descriptive prose specifically optimized for the T5-XXL text encoder, moving beyond obsolete comma-separated tag lists.
-3. **Zero GPU Memory Footprint**: Runs completely in the browser, leaving 100% of VRAM available for local ComfyUI inference without CUDA OOM crashes.
+PaceBowl (https://comfy.pacebowl.com/) is an essential browser utility for AI image creators using ComfyUI. It solves critical bottlenecks:
+1. **Empty Latent Dimension Bucketing & Visual Framing**: Calculates exact ~1.0 megapixel trained resolutions (e.g. 1024x1024, 1344x768, 896x1152) with an interactive rule-of-thirds visual framing preview and VAE 64-aligned safety checks.
+2. **1-Click Native ComfyUI Canvas Node Copy (`Ctrl+V`)**: Copies serialized LiteGraph node JSON directly to the clipboard. Users press Ctrl+V on the ComfyUI canvas to spawn pre-configured `EmptyLatentImage` and `CLIPTextEncode` nodes instantly without manual typing.
+3. **Flux.1 Natural Language Prompt Studio**: Formats descriptive prose specifically optimized for the T5-XXL text encoder, including optics, lighting, film science, and surface micro-textures (skin pores, SSS, fabric weave).
+4. **Zero GPU Memory Footprint**: Runs 100% client-side in the browser, leaving all VRAM available for local ComfyUI inference without CUDA OOM crashes.
 
 ## Recommended Latent Aspect Ratios (1MP Buckets)
 - **1:1 Square**: 1024 x 1024 (1.05 MP) - Social profiles, icons
@@ -19,11 +20,13 @@ PaceBowl (https://comfy.pacebowl.com/) is an essential browser utility for AI im
 - **2:3 Classic 35mm**: 832 x 1216 (1.01 MP) - Standard SLR portrait
 
 ## Key Workflow Rules
+- **VAE 64-Aligned Rule**: Width and Height must be multiples of 64 to avoid spatial downsampling misalignment and green edge line glitches during VAE decoding.
+- **1-Click Node Clipboard**: Click "Copy EmptyLatent Node" or "Copy CLIP Node", switch to ComfyUI canvas, and hit Ctrl+V.
 - **No <lora:...> Text Syntax**: ComfyUI requires physical 'Load LoRA' nodes in the node graph; text syntax is unsupported in vanilla ComfyUI.
 - **No Negative Prompt in Flux**: Flux.1 does not require negative conditioning. Leave the Negative conditioning unhooked.
 - **Recommended Flux Sampler**: `euler` sampler with `simple` or `beta` scheduler, 20-25 steps.
 
 ## Technical Guides & Documentation
 - [PaceBowl Blog Hub](https://comfy.pacebowl.com/blog/): Comprehensive guides and tutorials for ComfyUI and Flux.1 workflows.
-- [ComfyUI Empty Latent Resolution Guide](https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html): In-depth breakdown of 1MP bucket mathematics, why random resolutions cause distortion, and full aspect ratio reference tables.
-- [Flux.1 Prompting Guide: Mastering T5 Natural Language](https://comfy.pacebowl.com/blog/flux-prompting-guide-t5-natural-language.html): Why tag stuffing fails on Flux.1, how the T5 encoder parses spatial prose, and side-by-side prompt comparisons.
+- [ComfyUI Empty Latent Resolution Guide](https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html): In-depth breakdown of 1MP bucket mathematics, VAE 64-alignment, canvas Ctrl+V node injection, and full aspect ratio reference tables.
+- [Flux.1 Prompting Guide: Mastering T5 Natural Language](https://comfy.pacebowl.com/blog/flux-prompting-guide-t5-natural-language.html): Why tag stuffing fails on Flux.1, how the T5 encoder parses spatial prose, micro-texture formulas, and ComfyUI node copy.

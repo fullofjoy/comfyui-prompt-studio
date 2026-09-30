@@ -38,11 +38,40 @@
           "name": "PaceBowl Studio"
         },
         "datePublished": "2026-09-29",
-        "dateModified": "2026-09-29",
+        "dateModified": "2026-09-30",
         "publisher": {
           "@type": "Organization",
           "name": "PaceBowl Studio"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why do arbitrary resolutions like 1920x1080 cause distortions in ComfyUI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Diffusion foundation models (Flux.1 and SDXL) are trained on discrete 1.0 megapixel buckets (~1,048,576 pixels). Using arbitrary resolutions forces the model outside its trained latent distribution, causing duplicate heads, anatomical deformities, and VRAM memory spikes."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why must ComfyUI Empty Latent resolutions be divisible by 64?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "ComfyUI VAE encoders and decoders compress image pixels by an 8x spatial downsampling factor. During patchification and latent decoding, non-64 multiples can trigger misalignment, green edge lines, and decoding tensor artifacts."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How to paste an EmptyLatentImage node directly onto ComfyUI canvas without typing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PaceBowl ComfyUI Studio provides a 'Copy EmptyLatent Node (Canvas Ctrl+V)' button. Clicking it serializes the LiteGraph node JSON into your clipboard. Switch to your ComfyUI browser tab and press Ctrl+V to paste the pre-configured node immediately."
+            }
+          }
+        ]
       },
       {
         "@type": "BreadcrumbList",
@@ -127,6 +156,16 @@
 
     <!-- Body -->
     <div class="space-y-6 text-slate-300 text-sm leading-relaxed">
+      <!-- AEO Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-900/90 border border-sky-500/40 shadow-lg text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ Direct Answer (TL;DR)</span>
+        </div>
+        <p class="text-slate-300 leading-relaxed">
+          <strong>Never enter raw screen sizes (like 1920x1080) into ComfyUI Empty Latent Image.</strong> Flux.1 and SDXL are trained on <strong>1.0 Megapixel buckets (~1,048,576 pixels)</strong> with dimensions strictly divisible by <strong>64</strong> to match VAE 8x downsampling. Use calibrated buckets like <strong>1024×1024 (1:1)</strong>, <strong>1344×768 (16:9)</strong>, or <strong>896×1152 (3:4)</strong> to completely eliminate duplicate heads, stretched limbs, and VAE decoding edge artifacts.
+        </p>
+      </div>
+
       <p>
         One of the most frequent mistakes beginners make when transitioning from Midjourney or WebUI to ComfyUI is typing arbitrary video dimensions like <code>1920</code> (Width) and <code>1080</code> (Height) directly into the <strong>Empty Latent Image</strong> node.
       </p>
@@ -143,6 +182,34 @@
       </p>
       <p>
         When you feed an uncalibrated resolution like 1920x1080 (which is 2.07 Megapixels, double the native capacity), the model's self-attention layers perceive excessive canvas space. Having no concept of a 2MP single scene, the diffusion process attempts to tile two 1MP concepts side-by-side—spawning duplicate bodies or repeating horizon lines.
+      </p>
+
+      <!-- New Section: The VAE 64-Aligned Rule -->
+      <h2 class="text-xl font-bold text-white pt-4">The VAE 64-Aligned Rule: Why Arbitrary Multiples Cause Green Lines</h2>
+      <p>
+        In modern diffusion pipelines, image generation does not happen in RGB pixel space—it occurs in the latent space managed by the <strong>Variational Autoencoder (VAE)</strong>. The VAE compresses an image by an 8×8 factor (spatial downsampling).
+      </p>
+      <p>
+        If your width or height is not a multiple of 64, latent patchification causes pixel remainder clipping during decoding. This manifests as faint green or pink border lines along the right and bottom edges, or subtle blurring artifacts. In our <a href="https://comfy.pacebowl.com" class="text-sky-400 underline">ComfyUI Prompt Studio</a>, the calculator automatically runs a <code>w % 64 === 0 && h % 64 === 0</code> validation test to guarantee safe VAE alignment.
+      </p>
+
+      <!-- New Section: 1-Click Native Node Copy -->
+      <h2 class="text-xl font-bold text-white pt-4">Instant Workflow Injection: Native ComfyUI Canvas Paste (Ctrl+V)</h2>
+      <p>
+        Manually typing width and height into ComfyUI nodes is tedious and error-prone. Modern ComfyUI supports pasting serialized node objects directly onto the web canvas.
+      </p>
+      <p>
+        In PaceBowl ComfyUI Studio, clicking <strong>"Copy EmptyLatent Node (Canvas Ctrl+V)"</strong> copies the official LiteGraph node JSON into your clipboard:
+      </p>
+
+      <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-sky-300 overflow-x-auto"><code>{
+  "nodes": [{
+    "type": "EmptyLatentImage",
+    "widgets_values": [1344, 768, 1]
+  }]
+}</code></pre>
+      <p>
+        Simply open your ComfyUI browser tab and press <strong>Ctrl+V</strong> anywhere on the blank canvas. The node instantly appears with your calibrated 1MP dimensions pre-filled!
       </p>
 
       <h2 class="text-xl font-bold text-white pt-4">Complete 1MP Resolution Lookup Table</h2>
@@ -212,6 +279,29 @@
         <li>Pass the decoded VAE output through an <strong>Upscale Model Loader</strong> (using models like <code>4x-UltraSharp</code> or <code>4x_NMKD-Superscale</code>).</li>
         <li>(Optional) Perform a gentle second-pass <strong>KSampler (Inpainting/Hires fix)</strong> with a low denoise value between <code>0.25</code> and <code>0.35</code> to sharpen fine textures without altering the core scene composition.</li>
       </ol>
+
+      <!-- Semantic FAQ Section for AEO -->
+      <h2 class="text-xl font-bold text-white pt-6">Frequently Asked Questions (AEO Reference)</h2>
+      <div class="space-y-4 pt-2">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+          <h3 class="font-bold text-white text-xs mb-1">Why do arbitrary resolutions like 1920x1080 cause distortions in ComfyUI?</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Diffusion foundation models (Flux.1 and SDXL) are trained on discrete 1.0 megapixel buckets (~1,048,576 pixels). Using arbitrary resolutions forces the model outside its trained latent distribution, causing duplicate heads, anatomical deformities, and VRAM memory spikes.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+          <h3 class="font-bold text-white text-xs mb-1">Why must ComfyUI Empty Latent resolutions be divisible by 64?</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            ComfyUI VAE encoders and decoders compress image pixels by an 8x spatial downsampling factor. During patchification and latent decoding, non-64 multiples can trigger misalignment, green edge lines, and decoding tensor artifacts.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+          <h3 class="font-bold text-white text-xs mb-1">How to paste an EmptyLatentImage node directly onto ComfyUI canvas without typing?</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            <a href="https://comfy.pacebowl.com" class="text-sky-400 underline">PaceBowl ComfyUI Studio</a> provides a 'Copy EmptyLatent Node (Canvas Ctrl+V)' button. Clicking it serializes the LiteGraph node JSON into your clipboard. Switch to your ComfyUI browser tab and press Ctrl+V to paste the pre-configured node immediately.
+          </p>
+        </div>
+      </div>
     </div>
 
     <!-- Bottom CTA -->
