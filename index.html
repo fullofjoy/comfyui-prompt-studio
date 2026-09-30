@@ -4,6 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PaceBowl - ComfyUI Prompt Generator & Flux.1 Latent Calculator</title>
+
+  <!-- Theme Initialization: Anti-FOUC script -->
+  <script>
+    (function() {
+      const stored = localStorage.getItem('pacebowl-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
   <meta name="description" content="Free online ComfyUI prompt studio and Flux.1 / SDXL latent resolution calculator. Build descriptive natural language prompts for T5, calculate optimal 1MP aspect ratios, and copy directly into CLIP Text Encode.">
   <meta name="keywords" content="comfyui prompt generator, flux prompt generator, comfyui resolution calculator, empty latent image aspect ratio, sdxl prompt builder, comfyui workflow, pacebowl">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -118,15 +136,21 @@
 
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #07090e; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    html.dark ::-webkit-scrollbar-track { background: #07090e; }
+    html.dark ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    html.dark ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    html.light ::-webkit-scrollbar-track { background: #f8fafc; }
+    html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    html.light ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .glow-cyan {
       box-shadow: 0 0 35px -5px rgba(56, 189, 248, 0.15);
     }
+    html.light .glow-cyan {
+      box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.12);
+    }
   </style>
 </head>
-<body class="bg-[#07090e] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-[#07090e] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-200">
 
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-sky-500 text-slate-950 font-bold px-4 py-2.5 rounded-lg shadow-xl shadow-sky-500/20 text-xs flex items-center space-x-2">
@@ -134,14 +158,14 @@
   </div>
 
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur sticky top-0 z-40">
+  <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#07090e]/80 backdrop-blur sticky top-0 z-40 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <a href="https://pacebowl.com" class="text-xs font-mono text-slate-400 hover:text-white transition flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 shadow-sm" title="Back to PaceBowl Mothership">
+        <a href="https://pacebowl.com" class="text-xs font-mono text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm" title="Back to PaceBowl Mothership">
           <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
           <span>PaceBowl</span>
         </a>
-        <span class="text-slate-600 font-mono">/</span>
+        <span class="text-slate-400 dark:text-slate-600 font-mono">/</span>
         <div class="flex items-center space-x-2">
           <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,75 +173,87 @@
             </svg>
           </div>
           <div>
-            <span class="font-bold text-base text-white tracking-tight">ComfyUI <span class="text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-500/30">Studio</span></span>
+            <span class="font-bold text-base text-slate-900 dark:text-white tracking-tight">ComfyUI <span class="text-sky-600 dark:text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-500/30">Studio</span></span>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3 sm:space-x-4">
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle English / 简体中文">
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="lang-label" class="font-semibold font-mono text-[11px]">中文</span>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle Light / Dark mode">
+          <svg id="theme-sun-icon" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
         <!-- PaceBowl Suite Matrix Switcher -->
         <div class="relative group">
-          <button class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:border-sky-500/40 text-xs text-slate-300 transition shadow-sm">
+          <button class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-500/40 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm">
             <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-            <span class="font-medium hidden sm:inline">PaceBowl Suite</span>
+            <span class="font-medium hidden sm:inline" data-i18n="suite_btn">PaceBowl Suite</span>
             <span class="font-medium sm:hidden">Suite</span>
-            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
-          <div class="hidden group-hover:block absolute right-0 mt-1 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50">
-            <div class="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2 py-1">PaceBowl Ecosystem</div>
-            <a href="https://pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-800/80 text-xs text-slate-200 transition">
+          <div class="hidden group-hover:block absolute right-0 mt-1 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-2 z-50">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2 py-1" data-i18n="suite_title">PaceBowl Ecosystem</div>
+            <a href="https://pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 text-xs text-slate-700 dark:text-slate-200 transition">
               <span class="w-7 h-7 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">PB</span>
               <div>
-                <div class="font-bold text-white">PaceBowl Mothership</div>
-                <div class="text-[10px] text-slate-400">Central Hub & Runbooks</div>
+                <div class="font-bold text-slate-900 dark:text-white" data-i18n="suite_hub">PaceBowl Mothership</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400" data-i18n="suite_hub_sub">Central Hub & Runbooks</div>
               </div>
             </a>
-            <div class="border-t border-slate-800/80 my-1"></div>
-            <a href="https://hot.pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-800/80 text-xs text-slate-200 transition">
+            <div class="border-t border-slate-200 dark:border-slate-800/80 my-1"></div>
+            <a href="https://hot.pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 text-xs text-slate-700 dark:text-slate-200 transition">
               <span class="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">🔥</span>
               <div>
-                <div class="font-bold text-white flex items-center gap-1.5">
-                  AI Radar & Hotlist
-                  <span class="text-[9px] px-1 py-0.2 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">HOT</span>
+                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <span data-i18n="suite_hot">AI Radar & Hotlist</span>
+                  <span class="text-[9px] px-1 py-0.2 rounded bg-rose-500/20 text-rose-500 dark:text-rose-400 border border-rose-500/30">HOT</span>
                 </div>
-                <div class="text-[10px] text-slate-400">24h Automated Tech Intel & Digest</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400" data-i18n="suite_hot_sub">24h Automated Tech Intel & Digest</div>
               </div>
             </a>
-            <a href="https://comfy.pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg bg-sky-950/60 border border-sky-500/40 text-xs text-sky-200 mt-1">
+            <a href="https://comfy.pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/40 text-xs text-sky-800 dark:text-sky-200 mt-1">
               <span class="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center text-[10px] font-bold text-white">CF</span>
               <div>
-                <div class="font-bold text-white">ComfyUI Prompt Studio</div>
-                <div class="text-[10px] text-sky-300">Active • Flux & Latent Calc</div>
+                <div class="font-bold text-sky-900 dark:text-white" data-i18n="suite_comfy">ComfyUI Prompt Studio</div>
+                <div class="text-[10px] text-sky-600 dark:text-sky-300" data-i18n="suite_comfy_sub">Active • Flux & Latent Calc</div>
               </div>
             </a>
-            <a href="https://cursor.pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-800/80 text-xs text-slate-200 transition mt-1">
+            <a href="https://cursor.pacebowl.com" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 text-xs text-slate-700 dark:text-slate-200 transition mt-1">
               <span class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">CR</span>
               <div>
-                <div class="font-bold text-white">Cursor Rules Studio</div>
-                <div class="text-[10px] text-slate-400">Next.js & FastAPI .mdc</div>
+                <div class="font-bold text-slate-900 dark:text-white" data-i18n="suite_cursor">Cursor Rules Studio</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400" data-i18n="suite_cursor_sub">Next.js & FastAPI .mdc</div>
               </div>
             </a>
           </div>
         </div>
 
-        <a href="#calculator" class="text-xs text-slate-400 hover:text-slate-200 transition hidden md:inline">Calculator</a>
-        <a href="#faq" class="text-xs text-slate-400 hover:text-slate-200 transition hidden md:inline">Guide</a>
-        <a href="/blog/" class="text-xs text-sky-400 hover:text-sky-300 font-medium transition">Guides & Blog</a>
+        <a href="#calculator" class="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition hidden md:inline" data-i18n="nav_calc">Calculator</a>
+        <a href="#faq" class="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition hidden md:inline" data-i18n="nav_faq">Guide</a>
+        <a href="/blog/" class="text-xs text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 font-medium transition" data-i18n="nav_blog">Guides & Blog</a>
       </div>
     </div>
   </header>
 
   <!-- Hero Section -->
   <section class="pt-8 pb-4 px-4 text-center max-w-4xl mx-auto">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-500/30 text-sky-300 text-xs mb-3">
-      <span>⚡ Zero-GPU-Memory Overhead</span>
-      <span class="text-slate-600">•</span>
-      <span>T5 Natural Language Engine</span>
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-xs mb-3">
+      <span data-i18n="hero_badge1">⚡ Zero-GPU-Memory Overhead</span>
+      <span class="text-slate-400 dark:text-slate-600">•</span>
+      <span data-i18n="hero_badge2">T5 Natural Language Engine</span>
     </div>
-    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-3">
-      ComfyUI Prompt Studio & <span class="bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Flux.1 Latent Calculator</span>
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3" data-i18n="hero_title">
+      ComfyUI Prompt Studio & <span class="bg-gradient-to-r from-sky-500 via-teal-500 to-indigo-500 dark:from-sky-400 dark:via-teal-300 dark:to-indigo-400 bg-clip-text text-transparent">Flux.1 Latent Calculator</span>
     </h1>
-    <p class="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
+    <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed" data-i18n="hero_desc">
       Craft modern natural language paragraphs for Flux T5, calculate exact 1-Megapixel Empty Latent dimensions, and copy directly into CLIP Text Encode nodes without slowing down your GPU.
     </p>
   </section>
@@ -226,17 +262,17 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-6">
 
     <!-- Section 1: Empty Latent Aspect Ratio & Resolution Calculator -->
-    <div id="calculator" class="mb-10 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl glow-cyan">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-800 gap-2">
+    <div id="calculator" class="mb-10 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl glow-cyan transition-colors duration-200">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-200 dark:border-slate-800 gap-2">
         <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span>
-            ComfyUI Empty Latent Resolution Calculator (1MP Buckets)
+            <span data-i18n="calc_sec_title">ComfyUI Empty Latent Resolution Calculator (1MP Buckets)</span>
           </h2>
-          <p class="text-xs text-slate-400">Avoid duplicate heads and stretched limbs by using native trained resolution buckets.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="calc_sec_desc">Avoid duplicate heads and stretched limbs by using native trained resolution buckets.</p>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="text-xs font-mono px-2 py-1 rounded bg-slate-950 border border-slate-800 text-sky-300" id="calc-stats">1024 × 1024 (1.05 MP)</span>
+          <span class="text-xs font-mono px-2 py-1 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sky-600 dark:text-sky-300 font-semibold" id="calc-stats">1024 × 1024 (1.05 MP)</span>
         </div>
       </div>
 
@@ -246,63 +282,63 @@
       </div>
 
       <!-- Interactive Inputs, Visual Aspect Preview & Node Copy -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-slate-950/70 p-5 rounded-xl border border-slate-800/80">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-slate-50 dark:bg-slate-950/70 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80">
         
         <!-- Visual Aspect Canvas Preview Box (4 cols) -->
-        <div class="lg:col-span-4 flex flex-col items-center justify-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-          <div class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between w-full px-1">
-            <span>Visual Aspect Framing</span>
-            <span id="vae-badge" class="px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/30">✓ VAE 64-Aligned</span>
+        <div class="lg:col-span-4 flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/60 shadow-sm">
+          <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between w-full px-1">
+            <span data-i18n="visual_aspect_title">Visual Aspect Framing</span>
+            <span id="vae-badge" class="px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-500/30">✓ VAE 64-Aligned</span>
           </div>
           <!-- Canvas Frame with Rule of Thirds Grid -->
-          <div class="w-full h-32 flex items-center justify-center relative bg-[#07090e] rounded-lg border border-slate-800 overflow-hidden">
-            <div id="aspect-preview-frame" class="relative border-2 border-sky-400/80 bg-sky-500/10 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center" style="width: 90px; height: 90px;">
+          <div class="w-full h-32 flex items-center justify-center relative bg-slate-100 dark:bg-[#07090e] rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div id="aspect-preview-frame" class="relative border-2 border-sky-500 dark:border-sky-400/80 bg-sky-500/10 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center" style="width: 90px; height: 90px;">
               <!-- Rule of thirds lines -->
               <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-25">
-                <div class="border-r border-b border-sky-300"></div>
-                <div class="border-r border-b border-sky-300"></div>
-                <div class="border-b border-sky-300"></div>
-                <div class="border-r border-b border-sky-300"></div>
-                <div class="border-r border-b border-sky-300"></div>
-                <div class="border-b border-sky-300"></div>
-                <div class="border-r border-b border-sky-300"></div>
-                <div class="border-r border-b border-sky-300"></div>
+                <div class="border-r border-b border-sky-400"></div>
+                <div class="border-r border-b border-sky-400"></div>
+                <div class="border-b border-sky-400"></div>
+                <div class="border-r border-b border-sky-400"></div>
+                <div class="border-r border-b border-sky-400"></div>
+                <div class="border-b border-sky-400"></div>
+                <div class="border-r border-b border-sky-400"></div>
+                <div class="border-r border-b border-sky-400"></div>
                 <div></div>
               </div>
-              <span id="aspect-ratio-label" class="relative z-10 text-[11px] font-mono font-bold text-white bg-slate-950/80 px-1.5 py-0.5 rounded shadow">1:1</span>
+              <span id="aspect-ratio-label" class="relative z-10 text-[11px] font-mono font-bold text-slate-900 dark:text-white bg-white/90 dark:bg-slate-950/80 px-1.5 py-0.5 rounded shadow border border-slate-200 dark:border-slate-800">1:1</span>
             </div>
           </div>
           <div class="text-[10px] font-mono text-slate-500 mt-2 flex items-center justify-between w-full px-1">
             <span id="pixel-count-label">1,048,576 px</span>
-            <span id="budget-percentage" class="text-sky-400 font-semibold">100% of 1MP</span>
+            <span id="budget-percentage" class="text-sky-600 dark:text-sky-400 font-semibold">100% of 1MP</span>
           </div>
         </div>
 
         <!-- Manual Inputs & Copy Actions (8 cols) -->
         <div class="lg:col-span-8 space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="flex items-center space-x-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-              <label class="text-xs text-slate-400 font-mono w-14">Width:</label>
-              <input type="number" id="input-width" value="1024" step="64" min="256" max="2048" oninput="manualResolutionChange()" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
-              <button onclick="copyValue('input-width')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono shrink-0">Copy</button>
+            <div class="flex items-center space-x-2 bg-white dark:bg-slate-900/80 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+              <label class="text-xs text-slate-600 dark:text-slate-400 font-mono w-14">Width:</label>
+              <input type="number" id="input-width" value="1024" step="64" min="256" max="2048" oninput="manualResolutionChange()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-2.5 py-1 text-xs font-mono text-sky-600 dark:text-sky-300 focus:outline-none focus:border-sky-500">
+              <button onclick="copyValue('input-width')" class="px-2 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-[11px] font-mono shrink-0">Copy</button>
             </div>
 
-            <div class="flex items-center space-x-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-              <label class="text-xs text-slate-400 font-mono w-14">Height:</label>
-              <input type="number" id="input-height" value="1024" step="64" min="256" max="2048" oninput="manualResolutionChange()" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs font-mono text-sky-300 focus:outline-none focus:border-sky-500">
-              <button onclick="copyValue('input-height')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-mono shrink-0">Copy</button>
+            <div class="flex items-center space-x-2 bg-white dark:bg-slate-900/80 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+              <label class="text-xs text-slate-600 dark:text-slate-400 font-mono w-14">Height:</label>
+              <input type="number" id="input-height" value="1024" step="64" min="256" max="2048" oninput="manualResolutionChange()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-2.5 py-1 text-xs font-mono text-sky-600 dark:text-sky-300 focus:outline-none focus:border-sky-500">
+              <button onclick="copyValue('input-height')" class="px-2 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-[11px] font-mono shrink-0">Copy</button>
             </div>
           </div>
 
           <!-- 1-Click Clipboard Actions -->
-          <div class="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-slate-800/60">
-            <button onclick="copyFormatted('resolution')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <div class="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/60">
+            <button onclick="copyFormatted('resolution')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition" data-i18n="btn_copy_wxh">
               📋 Copy "W × H"
             </button>
-            <button onclick="copyFormatted('json')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            <button onclick="copyFormatted('json')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition" data-i18n="btn_copy_json">
               📄 JSON
             </button>
-            <button onclick="copyEmptyLatentNode()" id="node-latent-btn" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/20 transition transform active:scale-95" title="Copy serialized ComfyUI node to clipboard. Switch to ComfyUI canvas and press Ctrl+V to paste!">
+            <button onclick="copyEmptyLatentNode()" id="node-latent-btn" class="inline-flex items-center px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/20 transition transform active:scale-95" title="Copy serialized ComfyUI node to clipboard. Switch to ComfyUI canvas and press Ctrl+V to paste!" data-i18n="btn_copy_latent_node">
               ⚡ Copy EmptyLatent Node (Canvas Ctrl+V)
             </button>
           </div>
@@ -318,121 +354,121 @@
       <div class="lg:col-span-5 space-y-6">
 
         <!-- Model Mode Selector -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">1. Target Diffusion Model</label>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-200">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2.5" data-i18n="sec1_title">1. Target Diffusion Model</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <button onclick="setModelMode('flux')" id="mode-flux-btn" class="p-3 rounded-lg border text-left transition border-sky-500 bg-sky-950/40 text-white font-medium">
+            <button onclick="setModelMode('flux')" id="mode-flux-btn" class="p-3 rounded-lg border text-left transition border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-white font-medium">
               <div class="font-bold flex items-center gap-1.5">
-                <span>Flux.1 (Recommended)</span>
-                <span class="text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">T5 Prose</span>
+                <span data-i18n="mode_flux_title">Flux.1 (Recommended)</span>
+                <span class="text-[10px] bg-sky-200 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded font-mono" data-i18n="mode_flux_tag">T5 Prose</span>
               </div>
-              <div class="text-[11px] text-slate-400 mt-1">Natural descriptive sentences, no negative prompt</div>
+              <div class="text-[11px] text-slate-600 dark:text-slate-400 mt-1" data-i18n="mode_flux_desc">Natural descriptive sentences, no negative prompt</div>
             </button>
-            <button onclick="setModelMode('sdxl')" id="mode-sdxl-btn" class="p-3 rounded-lg border text-left transition border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200">
+            <button onclick="setModelMode('sdxl')" id="mode-sdxl-btn" class="p-3 rounded-lg border text-left transition border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
               <div class="font-bold flex items-center gap-1.5">
-                <span>SDXL / SD 1.5</span>
-                <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">Tag Weighted</span>
+                <span data-i18n="mode_sdxl_title">SDXL / SD 1.5</span>
+                <span class="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-mono" data-i18n="mode_sdxl_tag">Tag Weighted</span>
               </div>
-              <div class="text-[11px] text-slate-500 mt-1">Comma tags, (weights:1.2), dual positive/negative</div>
+              <div class="text-[11px] text-slate-500 mt-1" data-i18n="mode_sdxl_desc">Comma tags, (weights:1.2), dual positive/negative</div>
             </button>
           </div>
         </div>
 
         <!-- Subject Input -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">2. Core Subject & Action</label>
-          <textarea id="input-subject" rows="2" placeholder="e.g., A cybernetic samurai meditating in a rain-soaked neon garden..." oninput="assemblePrompt()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-500"></textarea>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-200">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2" data-i18n="sec2_title">2. Core Subject & Action</label>
+          <textarea id="input-subject" rows="2" placeholder="e.g., A cybernetic samurai meditating in a rain-soaked neon garden..." oninput="assemblePrompt()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-sky-500"></textarea>
           <div class="flex items-center justify-between mt-2 text-[11px] text-slate-500">
-            <span>Keep it specific & active</span>
-            <button onclick="randomSubject()" class="text-sky-400 hover:underline">🎲 Random Inspiration</button>
+            <span data-i18n="subject_hint">Keep it specific & active</span>
+            <button onclick="randomSubject()" class="text-sky-600 dark:text-sky-400 hover:underline" data-i18n="btn_random_subject">🎲 Random Inspiration</button>
           </div>
         </div>
 
         <!-- Optics, Lens & Perspective -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">3. Photography & Lens Specs</label>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-200">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2.5" data-i18n="sec3_title">3. Photography & Lens Specs</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <select id="opt-camera" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
-              <option value="">Camera Framing: None</option>
-              <option value="shot on 35mm lens, candid street photography">35mm Candid Street</option>
-              <option value="shot on 85mm f/1.4 lens with shallow depth of field and soft background bokeh">85mm f/1.4 Portrait Bokeh</option>
-              <option value="shot on wide-angle 24mm lens with dramatic perspective">24mm Dramatic Wide Angle</option>
-              <option value="macro close-up photography, sharp optical focus on intricate details">Macro Detail Close-up</option>
-              <option value="cinematic medium shot, eye-level framing">Cinematic Medium Shot</option>
-              <option value="aerial drone view from high overhead angle">Aerial Drone View</option>
-              <option value="dramatic low-angle hero shot looking up from ground level">Low-Angle Hero Shot</option>
-              <option value="intimate first-person POV shot from viewer perspective">First-Person POV Angle</option>
-              <option value="telephoto 200mm compression with isolated subject against compressed background">Telephoto 200mm Compression</option>
+            <select id="opt-camera" onchange="assemblePrompt()" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="" data-i18n="cam_none">Camera Framing: None</option>
+              <option value="shot on 35mm lens, candid street photography" data-i18n="cam_35mm">35mm Candid Street</option>
+              <option value="shot on 85mm f/1.4 lens with shallow depth of field and soft background bokeh" data-i18n="cam_85mm">85mm f/1.4 Portrait Bokeh</option>
+              <option value="shot on wide-angle 24mm lens with dramatic perspective" data-i18n="cam_24mm">24mm Dramatic Wide Angle</option>
+              <option value="macro close-up photography, sharp optical focus on intricate details" data-i18n="cam_macro">Macro Detail Close-up</option>
+              <option value="cinematic medium shot, eye-level framing" data-i18n="cam_medium">Cinematic Medium Shot</option>
+              <option value="aerial drone view from high overhead angle" data-i18n="cam_drone">Aerial Drone View</option>
+              <option value="dramatic low-angle hero shot looking up from ground level" data-i18n="cam_low">Low-Angle Hero Shot</option>
+              <option value="intimate first-person POV shot from viewer perspective" data-i18n="cam_pov">First-Person POV Angle</option>
+              <option value="telephoto 200mm compression with isolated subject against compressed background" data-i18n="cam_tele">Telephoto 200mm Compression</option>
             </select>
 
-            <select id="opt-film" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
-              <option value="">Film / Texture: None</option>
-              <option value="organic 35mm film grain, analog Kodak Portra 400 color science">Kodak Portra 400</option>
-              <option value="Fujifilm Velvia color profile, rich saturated contrast">Fujifilm Velvia</option>
-              <option value="crisp digital medium-format photograph on Hasselblad H6D">Hasselblad Digital Crisp</option>
-              <option value="gritty high-contrast black and white Ilford HP5 photography">Monochrome Ilford B&W</option>
-              <option value="soft vintage polaroid aesthetic with gentle light leaks">Vintage Polaroid</option>
-              <option value="cinematic 35mm Arri Alexa Hollywood color science with teal and orange grade">Arri Alexa Cinematic Grade</option>
-              <option value="nostalgic Kodachrome 64 vintage documentary color palette">Kodachrome 64 Vintage</option>
+            <select id="opt-film" onchange="assemblePrompt()" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="" data-i18n="film_none">Film / Texture: None</option>
+              <option value="organic 35mm film grain, analog Kodak Portra 400 color science" data-i18n="film_portra">Kodak Portra 400</option>
+              <option value="Fujifilm Velvia color profile, rich saturated contrast" data-i18n="film_velvia">Fujifilm Velvia</option>
+              <option value="crisp digital medium-format photograph on Hasselblad H6D" data-i18n="film_hasselblad">Hasselblad Digital Crisp</option>
+              <option value="gritty high-contrast black and white Ilford HP5 photography" data-i18n="film_ilford">Monochrome Ilford B&W</option>
+              <option value="soft vintage polaroid aesthetic with gentle light leaks" data-i18n="film_polaroid">Vintage Polaroid</option>
+              <option value="cinematic 35mm Arri Alexa Hollywood color science with teal and orange grade" data-i18n="film_arri">Arri Alexa Cinematic Grade</option>
+              <option value="nostalgic Kodachrome 64 vintage documentary color palette" data-i18n="film_kodachrome">Kodachrome 64 Vintage</option>
             </select>
           </div>
         </div>
 
         <!-- Lighting & Atmosphere -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">4. Lighting & Environment</label>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-200">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2.5" data-i18n="sec4_title">4. Lighting & Environment</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <select id="opt-lighting" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
-              <option value="">Lighting Style: None</option>
-              <option value="golden hour warm sunlight casting long dramatic shadows">Golden Hour Sunlight</option>
-              <option value="volumetric light rays filtering through atmospheric haze and mist">Volumetric God Rays</option>
-              <option value="moody cinematic chiaroscuro with deep shadows and rim highlights">Moody Chiaroscuro</option>
-              <option value="vibrant cyberpunk neon illumination reflecting off wet surfaces">Cyberpunk Wet Neon</option>
-              <option value="soft diffused overcast morning daylight, natural gentle wrap">Diffused Overcast Soft</option>
-              <option value="studio softbox lighting with subtle rim light">Studio Three-Point Light</option>
-              <option value="bioluminescent ambient glow radiating in deep darkness">Bioluminescent Deep Glow</option>
-              <option value="intimate warm flickering candlelight with soft falloff">Flickering Candlelight</option>
+            <select id="opt-lighting" onchange="assemblePrompt()" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="" data-i18n="light_none">Lighting Style: None</option>
+              <option value="golden hour warm sunlight casting long dramatic shadows" data-i18n="light_golden">Golden Hour Sunlight</option>
+              <option value="volumetric light rays filtering through atmospheric haze and mist" data-i18n="light_godrays">Volumetric God Rays</option>
+              <option value="moody cinematic chiaroscuro with deep shadows and rim highlights" data-i18n="light_chiaroscuro">Moody Chiaroscuro</option>
+              <option value="vibrant cyberpunk neon illumination reflecting off wet surfaces" data-i18n="light_neon">Cyberpunk Wet Neon</option>
+              <option value="soft diffused overcast morning daylight, natural gentle wrap" data-i18n="light_overcast">Diffused Overcast Soft</option>
+              <option value="studio softbox lighting with subtle rim light" data-i18n="light_studio">Studio Three-Point Light</option>
+              <option value="bioluminescent ambient glow radiating in deep darkness" data-i18n="light_biolum">Bioluminescent Deep Glow</option>
+              <option value="intimate warm flickering candlelight with soft falloff" data-i18n="light_candle">Flickering Candlelight</option>
             </select>
 
-            <select id="opt-environment" onchange="assemblePrompt()" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-sky-500">
-              <option value="">Environment: None</option>
-              <option value="surrounded by rain-slicked asphalt, damp reflection, subtle mist in the air">Rainy Urban Streets</option>
-              <option value="lush moss-covered ancient forest with morning dew">Ancient Misty Forest</option>
-              <option value="industrial brutalist concrete architecture, minimal background">Brutalist Concrete Interior</option>
-              <option value="sun-drenched minimalist loft with sheer curtains blowing">Sunlit Minimalist Loft</option>
-              <option value="futuristic space observatory overlooking celestial nebulae">Sci-Fi Space Observatory</option>
-              <option value="serene Kyoto Japanese zen rock garden with bamboo groves">Kyoto Zen Bamboo Garden</option>
-              <option value="sun-bleached Mediterranean coastal terrace overlooking turquoise waters">Mediterranean Coastal Villa</option>
+            <select id="opt-environment" onchange="assemblePrompt()" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="" data-i18n="env_none">Environment: None</option>
+              <option value="surrounded by rain-slicked asphalt, damp reflection, subtle mist in the air" data-i18n="env_rain">Rainy Urban Streets</option>
+              <option value="lush moss-covered ancient forest with morning dew" data-i18n="env_forest">Ancient Misty Forest</option>
+              <option value="industrial brutalist concrete architecture, minimal background" data-i18n="env_brutalist">Brutalist Concrete Interior</option>
+              <option value="sun-drenched minimalist loft with sheer curtains blowing" data-i18n="env_loft">Sunlit Minimalist Loft</option>
+              <option value="futuristic space observatory overlooking celestial nebulae" data-i18n="env_space">Sci-Fi Space Observatory</option>
+              <option value="serene Kyoto Japanese zen rock garden with bamboo groves" data-i18n="env_zen">Kyoto Zen Bamboo Garden</option>
+              <option value="sun-bleached Mediterranean coastal terrace overlooking turquoise waters" data-i18n="env_coastal">Mediterranean Coastal Villa</option>
             </select>
           </div>
         </div>
 
         <!-- Render & Style Aesthetic -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">5. Art Style / Medium</label>
-          <select id="opt-style" onchange="assemblePrompt()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
-            <option value="award-winning photorealistic editorial photograph">Photorealistic Editorial (National Geographic / Vogue)</option>
-            <option value="cinematic 3D render in Octane and Unreal Engine 5 style">Cinematic 3D Concept (Unreal Engine 5)</option>
-            <option value="hand-painted studio Ghibli anime aesthetic, painterly backgrounds and nostalgic charm">Studio Ghibli Anime Painterly</option>
-            <option value="vintage 1980s dark fantasy retro anime cel animation aesthetic">1980s Retro Dark Fantasy Anime</option>
-            <option value="oil painting on textured canvas with visible impasto brushstrokes">Fine Art Oil on Canvas</option>
-            <option value="intricate isometric digital concept art with detailed miniature props">Isometric Miniature Concept</option>
-            <option value="hyper-detailed graphite pencil architectural sketch on textured paper">Graphite Pencil Architectural Sketch</option>
-            <option value="futuristic retro-sci-fi concept illustration inspired by Moebius and Syd Mead">Moebius / Syd Mead Sci-Fi Illustration</option>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-200">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2.5" data-i18n="sec5_title">5. Art Style / Medium</label>
+          <select id="opt-style" onchange="assemblePrompt()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+            <option value="award-winning photorealistic editorial photograph" data-i18n="style_photo">Photorealistic Editorial (National Geographic / Vogue)</option>
+            <option value="cinematic 3D render in Octane and Unreal Engine 5 style" data-i18n="style_unreal">Cinematic 3D Concept (Unreal Engine 5)</option>
+            <option value="hand-painted studio Ghibli anime aesthetic, painterly backgrounds and nostalgic charm" data-i18n="style_ghibli">Studio Ghibli Anime Painterly</option>
+            <option value="vintage 1980s dark fantasy retro anime cel animation aesthetic" data-i18n="style_retro">1980s Retro Dark Fantasy Anime</option>
+            <option value="oil painting on textured canvas with visible impasto brushstrokes" data-i18n="style_oil">Fine Art Oil on Canvas</option>
+            <option value="intricate isometric digital concept art with detailed miniature props" data-i18n="style_iso">Isometric Miniature Concept</option>
+            <option value="hyper-detailed graphite pencil architectural sketch on textured paper" data-i18n="style_pencil">Graphite Pencil Architectural Sketch</option>
+            <option value="futuristic retro-sci-fi concept illustration inspired by Moebius and Syd Mead" data-i18n="style_moebius">Moebius / Syd Mead Sci-Fi Illustration</option>
           </select>
         </div>
 
         <!-- Surface Texture & Micro-Detail -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">6. Surface Texture & Micro-Detail</label>
-          <select id="opt-texture" onchange="assemblePrompt()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
-            <option value="">Texture Focus: None</option>
-            <option value="intricate skin pores, fine facial peach fuzz, and natural photorealistic skin texture">Photorealistic Skin Pores & Micro-Texture</option>
-            <option value="visible fabric weave, intricate embroidery, and natural textile threading">Textile & Fabric Weave Detail</option>
-            <option value="delicate translucent subsurface scattering (SSS) with luminous skin realism">Subsurface Scattering (Skin Luminous SSS)</option>
-            <option value="weathered metallic patina, industrial scratches, and fine mechanical wear">Weathered Industrial Patina & Scratches</option>
-            <option value="glistening dew drops, wet crystalline specular highlights, and surface moisture">Dew Drops & Specular Highlights</option>
-            <option value="chipped lacquer, aged cracked surface texture, and historical authentic patina">Antique Chipped Lacquer & Craquelure</option>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-200">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2.5" data-i18n="sec6_title">6. Surface Texture & Micro-Detail</label>
+          <select id="opt-texture" onchange="assemblePrompt()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+            <option value="" data-i18n="tex_none">Texture Focus: None</option>
+            <option value="intricate skin pores, fine facial peach fuzz, and natural photorealistic skin texture" data-i18n="tex_skin">Photorealistic Skin Pores & Micro-Texture</option>
+            <option value="visible fabric weave, intricate embroidery, and natural textile threading" data-i18n="tex_fabric">Textile & Fabric Weave Detail</option>
+            <option value="delicate translucent subsurface scattering (SSS) with luminous skin realism" data-i18n="tex_sss">Subsurface Scattering (Skin Luminous SSS)</option>
+            <option value="weathered metallic patina, industrial scratches, and fine mechanical wear" data-i18n="tex_metal">Weathered Industrial Patina & Scratches</option>
+            <option value="glistening dew drops, wet crystalline specular highlights, and surface moisture" data-i18n="tex_dew">Dew Drops & Specular Highlights</option>
+            <option value="chipped lacquer, aged cracked surface texture, and historical authentic patina" data-i18n="tex_lacquer">Antique Chipped Lacquer & Craquelure</option>
           </select>
         </div>
 
@@ -442,51 +478,51 @@
       <div class="lg:col-span-7 space-y-5 sticky top-20">
 
         <!-- Positive Prompt Box -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl glow-cyan">
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xl glow-cyan transition-colors duration-200">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
             <div class="flex items-center space-x-2">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <span class="font-bold text-xs uppercase tracking-wider text-slate-200">CLIP Text Encode (Positive Prompt)</span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200" data-i18n="clip_pos_title">CLIP Text Encode (Positive Prompt)</span>
             </div>
             <div class="flex items-center space-x-2">
               <span id="token-counter" class="text-[11px] font-mono text-slate-500">~0 words</span>
-              <button onclick="copyOutput('prompt-output')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1">
+              <button onclick="copyOutput('prompt-output')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                Copy Text
+                <span data-i18n="btn_copy_prompt">Copy Text</span>
               </button>
               <button onclick="copyClipNode()" id="clip-node-btn" class="px-3.5 py-1.5 rounded-md text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition flex items-center gap-1.5" title="Copy serialized CLIP Text Encode node to clipboard. Switch to ComfyUI canvas and press Ctrl+V to paste!">
-                ⚡ Copy Node (Canvas Ctrl+V)
+                <span data-i18n="btn_copy_clip_node">⚡ Copy Node (Canvas Ctrl+V)</span>
               </button>
             </div>
           </div>
 
-          <textarea id="prompt-output" rows="6" class="w-full bg-[#07090e] border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 leading-relaxed focus:outline-none focus:border-sky-500 select-all"></textarea>
+          <textarea id="prompt-output" rows="6" class="w-full bg-slate-50 dark:bg-[#07090e] border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-800 dark:text-slate-200 leading-relaxed focus:outline-none focus:border-sky-500 select-all"></textarea>
         </div>
 
         <!-- Negative Prompt Box (Only visible in SDXL Mode) -->
-        <div id="negative-box" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+        <div id="negative-box" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xl transition-colors duration-200">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
             <div class="flex items-center space-x-2">
               <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
-              <span class="font-bold text-xs uppercase tracking-wider text-slate-200">CLIP Text Encode (Negative Prompt)</span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200" data-i18n="clip_neg_title">CLIP Text Encode (Negative Prompt)</span>
             </div>
-            <button onclick="copyOutput('negative-output')" class="px-3 py-1 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+            <button onclick="copyOutput('negative-output')" class="px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition" data-i18n="btn_copy_neg">
               Copy Negative
             </button>
           </div>
 
-          <textarea id="negative-output" rows="3" class="w-full bg-[#07090e] border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 leading-relaxed focus:outline-none focus:border-rose-500">ugly, deformed, disfigured, poor anatomy, bad hands, missing fingers, extra limbs, low quality, blurry, watermark, signature</textarea>
+          <textarea id="negative-output" rows="3" class="w-full bg-slate-50 dark:bg-[#07090e] border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none focus:border-rose-500">ugly, deformed, disfigured, poor anatomy, bad hands, missing fingers, extra limbs, low quality, blurry, watermark, signature</textarea>
         </div>
 
         <!-- Flux vs SDXL Architecture Guidance Banner -->
-        <div id="flux-guidance" class="p-4 rounded-xl bg-sky-950/20 border border-sky-500/20 text-xs text-slate-300 space-y-2">
-          <div class="flex items-center gap-2 font-semibold text-sky-300">
+        <div id="flux-guidance" class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-500/20 text-xs text-slate-700 dark:text-slate-300 space-y-2 transition-colors duration-200">
+          <div class="flex items-center gap-2 font-semibold text-sky-700 dark:text-sky-300">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Flux.1 Prompting Best Practice (T5-XXL)</span>
+            <span data-i18n="guidance_title">Flux.1 Prompting Best Practice (T5-XXL)</span>
           </div>
-          <p class="leading-relaxed text-[11px] text-slate-400">
+          <p class="leading-relaxed text-[11px] text-slate-600 dark:text-slate-400" data-i18n="guidance_desc">
             Flux does not parse tag commas like SD 1.5. Instead, write in <strong>complete descriptive sentences</strong> detailing character, optics, lighting, and composition. <strong>No negative prompt node is needed</strong>—leave the Negative conditioning unplugged in Flux workflows.
           </p>
         </div>
@@ -496,91 +532,331 @@
   </main>
 
   <!-- Educational & AEO Section -->
-  <section id="faq" class="max-w-5xl mx-auto px-4 py-16 border-t border-slate-800/80 mt-16">
+  <section id="faq" class="max-w-5xl mx-auto px-4 py-16 border-t border-slate-200 dark:border-slate-800/80 mt-16 transition-colors duration-200">
     <div class="text-center mb-12">
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-sky-400 text-xs mb-3 font-mono">
-        <span>COMFYUI RUNBOOK</span>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sky-600 dark:text-sky-400 text-xs mb-3 font-mono">
+        <span data-i18n="faq_tag">COMFYUI RUNBOOK</span>
       </div>
-      <h2 class="text-2xl font-bold text-white mb-2">ComfyUI Prompting & Resolution Guide</h2>
-      <p class="text-slate-400 text-sm">Essential technical standards for ComfyUI and Flux.1 workflows.</p>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2" data-i18n="faq_title">ComfyUI Prompting & Resolution Guide</h2>
+      <p class="text-slate-600 dark:text-slate-400 text-sm" data-i18n="faq_subtitle">Essential technical standards for ComfyUI and Flux.1 workflows.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-        <h3 class="font-semibold text-slate-200 mb-2">Why do random Empty Latent resolutions fail?</h3>
-        <p class="text-slate-400 leading-relaxed text-xs">
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-colors duration-200">
+        <h3 class="font-semibold text-slate-900 dark:text-slate-200 mb-2" data-i18n="faq1_q">Why do random Empty Latent resolutions fail?</h3>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs" data-i18n="faq1_a">
           Diffusion models are trained in specific bucket sizes totaling roughly 1,048,576 pixels (1 Megapixel). Entering arbitrary dimensions like 1920x1080 forces the model into untrained aspect ratios, causing multiple bodies, dual heads, or stretched textures. Always use tested buckets like 1344x768 or 1024x1024.
         </p>
       </div>
 
-      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-        <h3 class="font-semibold text-slate-200 mb-2">How are LoRAs applied in ComfyUI?</h3>
-        <p class="text-slate-400 leading-relaxed text-xs">
-          Unlike WebUI (A1111), vanilla ComfyUI does NOT parse text syntax such as <code class="text-sky-300 bg-slate-900 px-1 py-0.5 rounded">&lt;lora:name:0.8&gt;</code> in text boxes. You must insert a physical <strong>Load LoRA</strong> node, connect the Model and CLIP wires through it, and set the strength slider directly on the node.
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-colors duration-200">
+        <h3 class="font-semibold text-slate-900 dark:text-slate-200 mb-2" data-i18n="faq2_q">How are LoRAs applied in ComfyUI?</h3>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs" data-i18n="faq2_a">
+          Unlike WebUI (A1111), vanilla ComfyUI does NOT parse text syntax such as <code class="text-sky-600 dark:text-sky-300 bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded">&lt;lora:name:0.8&gt;</code> in text boxes. You must insert a physical <strong>Load LoRA</strong> node, connect the Model and CLIP wires through it, and set the strength slider directly on the node.
         </p>
       </div>
 
-      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-        <h3 class="font-semibold text-slate-200 mb-2">What samplers work best with Flux.1?</h3>
-        <p class="text-slate-400 leading-relaxed text-xs">
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-colors duration-200">
+        <h3 class="font-semibold text-slate-900 dark:text-slate-200 mb-2" data-i18n="faq3_q">What samplers work best with Flux.1?</h3>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs" data-i18n="faq3_a">
           The recommended setup for Flux.1 Schnell / Dev in ComfyUI is the <strong>euler</strong> sampler paired with the <strong>simple</strong> or <strong>beta</strong> scheduler. Use 20–25 steps for Dev (4 steps for Schnell) with a guidance scale of 3.5.
         </p>
       </div>
 
-      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-        <h3 class="font-semibold text-slate-200 mb-2">Why run prompt generation on the web?</h3>
-        <p class="text-slate-400 leading-relaxed text-xs">
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-sm transition-colors duration-200">
+        <h3 class="font-semibold text-slate-900 dark:text-slate-200 mb-2" data-i18n="faq4_q">Why run prompt generation on the web?</h3>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs" data-i18n="faq4_a">
           Running local LLMs (like Ollama or Qwen) alongside Flux.1 or SDXL often exhausts 8GB–16GB VRAM, resulting in CUDA Out of Memory (OOM) crashes. Using PaceBowl on a second monitor offloads prompt structuring to the browser without consuming a single megabyte of GPU memory.
         </p>
       </div>
     </div>
 
     <!-- PaceBowl Matrix Companion Banner -->
-    <div class="mt-8 p-4 rounded-xl bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-indigo-500/5">
+    <div class="mt-8 p-4 rounded-xl bg-gradient-to-r from-slate-100 via-indigo-50/50 to-slate-100 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-indigo-500/5 transition-colors duration-200">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-sm shrink-0">
+        <div class="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm shrink-0">
           ⚡
         </div>
         <div>
-          <div class="text-xs font-bold text-white">Also in the PaceBowl Suite: Cursor Rules Generator (.mdc)</div>
-          <div class="text-[11px] text-slate-400 mt-0.5">Build modular, path-scoped .cursor/rules/*.mdc configuration files with Next.js 15, FastAPI, and Supabase presets.</div>
+          <div class="text-xs font-bold text-slate-900 dark:text-white" data-i18n="banner_title">Also in the PaceBowl Suite: Cursor Rules Generator (.mdc)</div>
+          <div class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5" data-i18n="banner_desc">Build modular, path-scoped .cursor/rules/*.mdc configuration files with Next.js 15, FastAPI, and Supabase presets.</div>
         </div>
       </div>
-      <a href="https://cursor.pacebowl.com" class="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-sm shadow-indigo-600/20">
+      <a href="https://cursor.pacebowl.com" class="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-sm shadow-indigo-600/20" data-i18n="banner_btn">
         Open Cursor Studio →
       </a>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-800/80 bg-[#07090e] py-8 text-center text-xs text-slate-500">
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#07090e] py-8 text-center text-xs text-slate-500 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
-        <span>PaceBowl &copy; 2026. Part of the <a href="https://pacebowl.com" class="text-sky-400 hover:underline">PaceBowl Suite Matrix</a>.</span>
+        <span data-i18n="footer_brand">PaceBowl &copy; 2026. Part of the <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Suite Matrix</a>.</span>
       </div>
-      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-400">
-        <a href="https://hot.pacebowl.com" class="hover:text-rose-400 text-rose-300/80 transition font-medium">🔥 AI Radar</a>
-        <a href="https://cursor.pacebowl.com" class="text-indigo-400 hover:text-indigo-300 font-medium transition">⚡ Cursor Rules</a>
-        <a href="#calculator" class="hover:text-slate-200 transition">Latent Calculator</a>
-        <a href="#faq" class="hover:text-slate-200 transition">ComfyUI FAQ</a>
-        <a href="/blog/" class="text-sky-400 hover:text-sky-300 font-medium transition">Guides & Blog</a>
-        <a href="https://github.com/comfyanonymous/ComfyUI" target="_blank" rel="noopener" class="hover:text-slate-200 transition">ComfyUI GitHub</a>
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-600 dark:text-slate-400">
+        <a href="https://hot.pacebowl.com" class="hover:text-rose-500 dark:hover:text-rose-400 text-rose-600 dark:text-rose-300/80 transition font-medium" data-i18n="footer_hot">🔥 AI Radar</a>
+        <a href="https://cursor.pacebowl.com" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium transition" data-i18n="footer_cursor">⚡ Cursor Rules</a>
+        <a href="#calculator" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_calc">Latent Calculator</a>
+        <a href="#faq" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_faq">ComfyUI FAQ</a>
+        <a href="/blog/" class="text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 font-medium transition" data-i18n="footer_blog">Guides & Blog</a>
+        <a href="https://github.com/comfyanonymous/ComfyUI" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_github">ComfyUI GitHub</a>
       </div>
     </div>
   </footer>
 
   <!-- Application Logic -->
   <script>
+    // I18N Dictionary
+    const I18N = {
+      en: {
+        suite_btn: 'PaceBowl Suite',
+        suite_title: 'PaceBowl Ecosystem',
+        suite_hub: 'PaceBowl Mothership',
+        suite_hub_sub: 'Central Hub & Runbooks',
+        suite_hot: 'AI Radar & Hotlist',
+        suite_hot_sub: '24h Automated Tech Intel & Digest',
+        suite_comfy: 'ComfyUI Prompt Studio',
+        suite_comfy_sub: 'Active • Flux & Latent Calc',
+        suite_cursor: 'Cursor Rules Studio',
+        suite_cursor_sub: 'Next.js & FastAPI .mdc',
+        nav_calc: 'Calculator',
+        nav_faq: 'Guide',
+        nav_blog: 'Guides & Blog',
+        hero_badge1: '⚡ Zero-GPU-Memory Overhead',
+        hero_badge2: 'T5 Natural Language Engine',
+        hero_title: 'ComfyUI Prompt Studio & <span class="bg-gradient-to-r from-sky-500 via-teal-500 to-indigo-500 dark:from-sky-400 dark:via-teal-300 dark:to-indigo-400 bg-clip-text text-transparent">Flux.1 Latent Calculator</span>',
+        hero_desc: 'Craft modern natural language paragraphs for Flux T5, calculate exact 1-Megapixel Empty Latent dimensions, and copy directly into CLIP Text Encode nodes without slowing down your GPU.',
+        calc_sec_title: 'ComfyUI Empty Latent Resolution Calculator (1MP Buckets)',
+        calc_sec_desc: 'Avoid duplicate heads and stretched limbs by using native trained resolution buckets.',
+        visual_aspect_title: 'Visual Aspect Framing',
+        btn_copy_wxh: '📋 Copy "W × H"',
+        btn_copy_json: '📄 JSON',
+        btn_copy_latent_node: '⚡ Copy EmptyLatent Node (Canvas Ctrl+V)',
+        sec1_title: '1. Target Diffusion Model',
+        mode_flux_title: 'Flux.1 (Recommended)',
+        mode_flux_tag: 'T5 Prose',
+        mode_flux_desc: 'Natural descriptive sentences, no negative prompt',
+        mode_sdxl_title: 'SDXL / SD 1.5',
+        mode_sdxl_tag: 'Tag Weighted',
+        mode_sdxl_desc: 'Comma tags, (weights:1.2), dual positive/negative',
+        sec2_title: '2. Core Subject & Action',
+        subject_hint: 'Keep it specific & active',
+        btn_random_subject: '🎲 Random Inspiration',
+        sec3_title: '3. Photography & Lens Specs',
+        cam_none: 'Camera Framing: None',
+        cam_35mm: '35mm Candid Street',
+        cam_85mm: '85mm f/1.4 Portrait Bokeh',
+        cam_24mm: '24mm Dramatic Wide Angle',
+        cam_macro: 'Macro Detail Close-up',
+        cam_medium: 'Cinematic Medium Shot',
+        cam_drone: 'Aerial Drone View',
+        cam_low: 'Low-Angle Hero Shot',
+        cam_pov: 'First-Person POV Angle',
+        cam_tele: 'Telephoto 200mm Compression',
+        film_none: 'Film / Texture: None',
+        film_portra: 'Kodak Portra 400',
+        film_velvia: 'Fujifilm Velvia',
+        film_hasselblad: 'Hasselblad Digital Crisp',
+        film_ilford: 'Monochrome Ilford B&W',
+        film_polaroid: 'Vintage Polaroid',
+        film_arri: 'Arri Alexa Cinematic Grade',
+        film_kodachrome: 'Kodachrome 64 Vintage',
+        sec4_title: '4. Lighting & Environment',
+        light_none: 'Lighting Style: None',
+        light_golden: 'Golden Hour Sunlight',
+        light_godrays: 'Volumetric God Rays',
+        light_chiaroscuro: 'Moody Chiaroscuro',
+        light_neon: 'Cyberpunk Wet Neon',
+        light_overcast: 'Diffused Overcast Soft',
+        light_studio: 'Studio Three-Point Light',
+        light_biolum: 'Bioluminescent Deep Glow',
+        light_candle: 'Flickering Candlelight',
+        env_none: 'Environment: None',
+        env_rain: 'Rainy Urban Streets',
+        env_forest: 'Ancient Misty Forest',
+        env_brutalist: 'Brutalist Concrete Interior',
+        env_loft: 'Sunlit Minimalist Loft',
+        env_space: 'Sci-Fi Space Observatory',
+        env_zen: 'Kyoto Zen Bamboo Garden',
+        env_coastal: 'Mediterranean Coastal Villa',
+        sec5_title: '5. Art Style / Medium',
+        style_photo: 'Photorealistic Editorial (National Geographic / Vogue)',
+        style_unreal: 'Cinematic 3D Concept (Unreal Engine 5)',
+        style_ghibli: 'Studio Ghibli Anime Painterly',
+        style_retro: '1980s Retro Dark Fantasy Anime',
+        style_oil: 'Fine Art Oil on Canvas',
+        style_iso: 'Isometric Miniature Concept',
+        style_pencil: 'Graphite Pencil Architectural Sketch',
+        style_moebius: 'Moebius / Syd Mead Sci-Fi Illustration',
+        sec6_title: '6. Surface Texture & Micro-Detail',
+        tex_none: 'Texture Focus: None',
+        tex_skin: 'Photorealistic Skin Pores & Micro-Texture',
+        tex_fabric: 'Textile & Fabric Weave Detail',
+        tex_sss: 'Subsurface Scattering (Skin Luminous SSS)',
+        tex_metal: 'Weathered Industrial Patina & Scratches',
+        tex_dew: 'Dew Drops & Specular Highlights',
+        tex_lacquer: 'Antique Chipped Lacquer & Craquelure',
+        clip_pos_title: 'CLIP Text Encode (Positive Prompt)',
+        btn_copy_prompt: 'Copy Text',
+        btn_copy_clip_node: '⚡ Copy Node (Canvas Ctrl+V)',
+        clip_neg_title: 'CLIP Text Encode (Negative Prompt)',
+        btn_copy_neg: 'Copy Negative',
+        guidance_title: 'Flux.1 Prompting Best Practice (T5-XXL)',
+        guidance_desc: 'Flux does not parse tag commas like SD 1.5. Instead, write in <strong>complete descriptive sentences</strong> detailing character, optics, lighting, and composition. <strong>No negative prompt node is needed</strong>—leave the Negative conditioning unplugged in Flux workflows.',
+        faq_tag: 'COMFYUI RUNBOOK',
+        faq_title: 'ComfyUI Prompting & Resolution Guide',
+        faq_subtitle: 'Essential technical standards for ComfyUI and Flux.1 workflows.',
+        faq1_q: 'Why do random Empty Latent resolutions fail?',
+        faq1_a: 'Diffusion models are trained in specific bucket sizes totaling roughly 1,048,576 pixels (1 Megapixel). Entering arbitrary dimensions like 1920x1080 forces the model into untrained aspect ratios, causing multiple bodies, dual heads, or stretched textures. Always use tested buckets like 1344x768 or 1024x1024.',
+        faq2_q: 'How are LoRAs applied in ComfyUI?',
+        faq2_a: 'Unlike WebUI (A1111), vanilla ComfyUI does NOT parse text syntax such as <code class="text-sky-600 dark:text-sky-300 bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded">&lt;lora:name:0.8&gt;</code> in text boxes. You must insert a physical <strong>Load LoRA</strong> node, connect the Model and CLIP wires through it, and set the strength slider directly on the node.',
+        faq3_q: 'What samplers work best with Flux.1?',
+        faq3_a: 'The recommended setup for Flux.1 Schnell / Dev in ComfyUI is the <strong>euler</strong> sampler paired with the <strong>simple</strong> or <strong>beta</strong> scheduler. Use 20–25 steps for Dev (4 steps for Schnell) with a guidance scale of 3.5.',
+        faq4_q: 'Why run prompt generation on the web?',
+        faq4_a: 'Running local LLMs (like Ollama or Qwen) alongside Flux.1 or SDXL often exhausts 8GB–16GB VRAM, resulting in CUDA Out of Memory (OOM) crashes. Using PaceBowl on a second monitor offloads prompt structuring to the browser without consuming a single megabyte of GPU memory.',
+        banner_title: 'Also in the PaceBowl Suite: Cursor Rules Generator (.mdc)',
+        banner_desc: 'Build modular, path-scoped .cursor/rules/*.mdc configuration files with Next.js 15, FastAPI, and Supabase presets.',
+        banner_btn: 'Open Cursor Studio →',
+        footer_brand: 'PaceBowl &copy; 2026. Part of the <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Suite Matrix</a>.',
+        footer_hot: '🔥 AI Radar',
+        footer_cursor: '⚡ Cursor Rules',
+        footer_calc: 'Latent Calculator',
+        footer_faq: 'ComfyUI FAQ',
+        footer_blog: 'Guides & Blog',
+        footer_github: 'ComfyUI GitHub'
+      },
+      zh: {
+        suite_btn: 'PaceBowl 套件',
+        suite_title: 'PaceBowl 生态矩阵',
+        suite_hub: 'PaceBowl 母舰枢纽',
+        suite_hub_sub: '中心枢纽与实战指南',
+        suite_hot: '科技热榜 · AI Radar',
+        suite_hot_sub: '24h 自动化 AI 情报雷达 & 晨报',
+        suite_comfy: 'ComfyUI 提示词工坊',
+        suite_comfy_sub: '活跃中 • Flux 潜空间计算器',
+        suite_cursor: 'Cursor 规则工坊',
+        suite_cursor_sub: 'Next.js & FastAPI .mdc',
+        nav_calc: '潜空间计算器',
+        nav_faq: 'ComfyUI 实战指南',
+        nav_blog: '实战手册与博客',
+        hero_badge1: '⚡ 零显存占用与开销',
+        hero_badge2: 'T5 自然语言提示词引擎',
+        hero_title: 'ComfyUI 提示词工坊 & <span class="bg-gradient-to-r from-sky-500 via-teal-500 to-indigo-500 dark:from-sky-400 dark:via-teal-300 dark:to-indigo-400 bg-clip-text text-transparent">Flux.1 潜空间计算器</span>',
+        hero_desc: '为 Flux T5 定制现代自然语言长文本提示词，精准计算 1MP 黄金训练级 Empty Latent 潜空间尺寸，一键直连 CLIP 文本编码节点，绝不挤占任何本地 GPU 显存。',
+        calc_sec_title: 'ComfyUI 潜空间分辨率计算器（100万像素训练分桶）',
+        calc_sec_desc: '使用扩散模型原生训练分辨率分桶，彻底杜绝多头畸形与肢体拉伸。',
+        visual_aspect_title: '画面构图比例预览',
+        btn_copy_wxh: '📋 复制 "宽 × 高"',
+        btn_copy_json: '📄 JSON 格式',
+        btn_copy_latent_node: '⚡ 复制 EmptyLatent 节点 (画布 Ctrl+V 粘贴)',
+        sec1_title: '1. 目标生图模型',
+        mode_flux_title: 'Flux.1（官方推荐）',
+        mode_flux_tag: 'T5 自然段落',
+        mode_flux_desc: '连贯详实的自然语言段落，无需负向提示词',
+        mode_sdxl_title: 'SDXL / SD 1.5',
+        mode_sdxl_tag: '标签权重',
+        mode_sdxl_desc: '逗号分隔标签、(括号权重:1.2)、正负双向输入',
+        sec2_title: '2. 画面主体与动作动态',
+        subject_hint: '尽量具体描绘主体动作与细节',
+        btn_random_subject: '🎲 随机灵感',
+        sec3_title: '3. 摄影镜头与焦段画幅',
+        cam_none: '镜头取景：无预设',
+        cam_35mm: '35mm 人文街拍纪实',
+        cam_85mm: '85mm f/1.4 浅景深柔美虚化肖像',
+        cam_24mm: '24mm 戏剧张力广角大透视',
+        cam_macro: '微距近景特写（锐利微观细节）',
+        cam_medium: '电影感中景（平视视线构图）',
+        cam_drone: '航拍无人机高空俯瞰视角',
+        cam_low: '低角度仰拍英雄视线',
+        cam_pov: '第一人称主观 POV 视角',
+        cam_tele: '200mm 长焦空间压缩透视',
+        film_none: '胶片/质感：无预设',
+        film_portra: '柯达 Kodak Portra 400 胶片颗粒感',
+        film_velvia: '富士胶卷 Fujifilm Velvia 浓郁色彩',
+        film_hasselblad: '哈苏 Hasselblad 中画幅细腻数码感',
+        film_ilford: '伊尔福 Ilford HP5 经典高反差黑白',
+        film_polaroid: '复古拍立得柔光漏光拍法',
+        film_arri: '阿莱 Arri Alexa 好莱坞青橙电影级调色',
+        film_kodachrome: '柯达克罗姆 Kodachrome 64 纪实复古调色',
+        sec4_title: '4. 光影氛围与场景空间',
+        light_none: '光影风格：无预设',
+        light_golden: '黄金时刻暖阳（戏剧性斜射拉长阴影）',
+        light_godrays: '丁达尔体积光雾气丁达尔效应',
+        light_chiaroscuro: '明暗对照法（深沉暗部与轮廓边缘光）',
+        light_neon: '赛博朋克雨夜反光霓虹冷艳照明',
+        light_overcast: '柔和漫射阴天晨光（自然包裹漫射）',
+        light_studio: '专业摄影棚三点布光（主光+轮廓光）',
+        light_biolum: '深海/奇幻生物荧光神秘环境光',
+        light_candle: '微弱摇曳烛光（温暖私密衰减）',
+        env_none: '场景环境：无预设',
+        env_rain: '雨水湿滑的反光都市街道沥青路面',
+        env_forest: '布满苔藓与晨露的古老静谧迷雾森林',
+        env_brutalist: '野兽派粗野清水混凝土极简建筑空间',
+        env_loft: '阳光明媚微风吹拂窗帘的极简阁楼',
+        env_space: '俯瞰壮丽星系星云的未来空间观测台',
+        env_zen: '京都静谧枯山水石庭与翠绿竹林',
+        env_coastal: '俯瞰绿松石海水的地中海阳光露台别墅',
+        sec5_title: '5. 艺术媒介与风格流派',
+        style_photo: '纪实级超写实大片（国家地理 / VOGUE 封面）',
+        style_unreal: '虚幻引擎 5 与 Octane 电影级 3D 渲染',
+        style_ghibli: '吉卜力工作室宫崎骏手绘水彩画风',
+        style_retro: '1980 年代复古暗黑奇幻赛璐珞动画风',
+        style_oil: '高质感油画布面厚涂肌理油画',
+        style_iso: '精致微缩等距等角 3D 概念设计',
+        style_pencil: '质感纸张超精细建筑铅笔素描稿',
+        style_moebius: '墨比斯 / 席德·米德 复古未来科幻插画',
+        sec6_title: '6. 材质纹理与微观细节',
+        tex_none: '材质重点：无预设',
+        tex_skin: '极度真实的皮肤毛孔与面部微绒毛',
+        tex_fabric: '清晰纺织纹理编织与精密刺绣走线',
+        tex_sss: '次表面散射（皮肤透光晶莹通透感 SSS）',
+        tex_metal: '岁月侵蚀工业金属锈迹与磨损划痕',
+        tex_dew: '晶莹剔透的水珠露水与高光镜面反射',
+        tex_lacquer: '斑驳古旧开片漆面与历史陈旧包浆',
+        clip_pos_title: 'CLIP 文本编码器（正向提示词）',
+        btn_copy_prompt: '复制文本',
+        btn_copy_clip_node: '⚡ 复制节点 (画布 Ctrl+V 粘贴)',
+        clip_neg_title: 'CLIP 文本编码器（负向提示词）',
+        btn_copy_neg: '复制负向词',
+        guidance_title: 'Flux.1 提示词黄金法则 (T5-XXL)',
+        guidance_desc: 'Flux 采用先进的 T5 编码器，不再依赖 SD 1.5 时代的零散逗号标签。请使用<strong>详尽连贯的自然语言长句子</strong>描写人物外貌、光影氛围与镜头构图。<strong>Flux 默认无需负向提示词</strong>——在节点图里断开负向 Conditioning 连接即可。',
+        faq_tag: 'COMFYUI 实战手册',
+        faq_title: 'ComfyUI 提示词与潜空间分辨率指南',
+        faq_subtitle: '深度掌握 ComfyUI 与 Flux.1 生图的核心工业级技术规范。',
+        faq1_q: '为什么任意随手填写的 Empty Latent 分辨率容易崩图？',
+        faq1_a: '扩散模型（如 Flux.1 和 SDXL）是在总像素约 1,048,576 像素（100万像素）的分桶尺寸上微调训练的。直接输入 1920x1080 等非标准比例会迫使模型进入未经训练的冷门区间，极易引发双头、多肢体或严重拉伸。请务必使用经过官方验证的训练桶（如 1344x768、1024x1024、896x1152 等）。',
+        faq2_q: 'ComfyUI 里的 LoRA 怎么正确加载？',
+        faq2_a: '与 WebUI (A1111) 不同，原生 ComfyUI 的文本框<strong>完全不支持</strong>直接输入 <code class="text-sky-600 dark:text-sky-300 bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded">&lt;lora:name:0.8&gt;</code>。你必须在画布中新建一个实体的 <strong>Load LoRA</strong> 节点，将 Model 和 CLIP 连线串联通过该节点，并在节点上直接调节权重滑块。',
+        faq3_q: 'Flux.1 推荐搭配什么采样器与调度器？',
+        faq3_a: 'Flux.1 Schnell / Dev 在 ComfyUI 中的黄金推荐组合是 <strong>euler</strong> 采样器搭配 <strong>simple</strong> 或 <strong>beta</strong> 调度器。Dev 模型建议 20–25 步，Schnell 模型建议 4 步，Guidance Scale 引导系数推荐 3.5。',
+        faq4_q: '为什么要把提示词生成与计算器放在独立网页端？',
+        faq4_a: '本地运行大模型（如 Ollama 或 Qwen）辅助写提示词时，会与本地运行的 Flux.1 (12GB~24GB) 疯狂争抢显存，极易遭遇 CUDA Out of Memory 显存爆满崩溃。在副屏打开 PaceBowl 网页工具，可将提示词构想与潜空间计算完全分流至浏览器 CPU，零显存开销。',
+        banner_title: 'PaceBowl 旗舰生态联动：Cursor Rules (.mdc) 规则工坊',
+        banner_desc: '一键为 Next.js 15、FastAPI、Supabase 等全栈技术栈定制基于路径隔离的现代 .cursor/rules/*.mdc 模块化规则集。',
+        banner_btn: '打开 Cursor 规则工坊 →',
+        footer_brand: 'PaceBowl &copy; 2026. 隶属于 <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Suite 生态矩阵</a>。',
+        footer_hot: '🔥 科技热榜',
+        footer_cursor: '⚡ Cursor 规则',
+        footer_calc: '潜空间计算器',
+        footer_faq: '常见问题',
+        footer_blog: '博客与指南',
+        footer_github: 'ComfyUI 开源社区'
+      }
+    };
+
+    let currentLang = localStorage.getItem('pacebowl-lang') || (navigator.language && navigator.language.startsWith('zh') ? 'zh' : 'en');
+
     // Standard 1MP Bucketed resolutions for Flux and SDXL
     const RESOLUTION_BUCKETS = [
-      { name: '1:1 Square', w: 1024, h: 1024, ratio: '1:1', tag: 'Social / Avatar' },
-      { name: '16:9 Cinema', w: 1344, h: 768, ratio: '16:9', tag: 'Landscape / Wallpaper' },
-      { name: '9:16 Story', w: 768, h: 1344, ratio: '9:16', tag: 'Reels / Mobile' },
-      { name: '4:3 Standard', w: 1152, h: 896, ratio: '4:3', tag: 'Classic Landscape' },
-      { name: '3:4 Portrait', w: 896, h: 1152, ratio: '3:4', tag: 'Classic Portrait' },
-      { name: '21:9 Ultra', w: 1536, h: 640, ratio: '21:9', tag: 'Ultra-wide Cinema' },
-      { name: '3:2 Photo', w: 1216, h: 832, ratio: '3:2', tag: '35mm Landscape' },
-      { name: '2:3 Photo', w: 832, h: 1216, ratio: '2:3', tag: '35mm Portrait' }
+      { name: '1:1 Square', w: 1024, h: 1024, ratio: '1:1', tag_en: 'Social / Avatar', tag_zh: '社交头像 / 方形' },
+      { name: '16:9 Cinema', w: 1344, h: 768, ratio: '16:9', tag_en: 'Landscape / Wallpaper', tag_zh: '横屏壁纸 / 宽屏' },
+      { name: '9:16 Story', w: 768, h: 1344, ratio: '9:16', tag_en: 'Reels / Mobile', tag_zh: '竖屏短视频 / 手机' },
+      { name: '4:3 Standard', w: 1152, h: 896, ratio: '4:3', tag_en: 'Classic Landscape', tag_zh: '经典横幅 4:3' },
+      { name: '3:4 Portrait', w: 896, h: 1152, ratio: '3:4', tag_en: 'Classic Portrait', tag_zh: '经典竖画肖像' },
+      { name: '21:9 Ultra', w: 1536, h: 640, ratio: '21:9', tag_en: 'Ultra-wide Cinema', tag_zh: '21:9 极宽电影荧幕' },
+      { name: '3:2 Photo', w: 1216, h: 832, ratio: '3:2', tag_en: '35mm Landscape', tag_zh: '35mm 经典横构图' },
+      { name: '2:3 Photo', w: 832, h: 1216, ratio: '2:3', tag_en: '35mm Portrait', tag_zh: '35mm 经典竖肖像' }
     ];
 
     let currentModel = 'flux'; // 'flux' | 'sdxl'
@@ -599,19 +875,22 @@
       const container = document.getElementById('ratio-buttons-grid');
       container.innerHTML = '';
 
+      const isZh = currentLang === 'zh';
+
       RESOLUTION_BUCKETS.forEach((b, idx) => {
         const btn = document.createElement('button');
         const isActive = b.w === currentBucket.w && b.h === currentBucket.h;
         btn.id = `bucket-btn-${idx}`;
         btn.className = `p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
           isActive 
-            ? 'border-sky-500 bg-sky-950/40 text-white font-medium shadow-sm shadow-sky-500/20' 
-            : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+            ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-white font-medium shadow-sm shadow-sky-500/20' 
+            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-slate-200'
         }`;
+        const tag = isZh ? b.tag_zh : b.tag_en;
         btn.innerHTML = `
-          <div class="font-bold text-slate-200">${b.ratio}</div>
-          <div class="text-[11px] font-mono text-sky-400 mt-1">${b.w}×${b.h}</div>
-          <div class="text-[9px] text-slate-500 mt-0.5 truncate">${b.tag}</div>
+          <div class="font-bold text-slate-900 dark:text-slate-200">${b.ratio}</div>
+          <div class="text-[11px] font-mono text-sky-600 dark:text-sky-400 mt-1">${b.w}×${b.h}</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 truncate">${tag}</div>
         `;
         btn.onclick = () => selectBucket(b);
         container.appendChild(btn);
@@ -706,13 +985,13 @@
       const fluxGuide = document.getElementById('flux-guidance');
 
       if (mode === 'flux') {
-        fluxBtn.className = "p-3 rounded-lg border text-left transition border-sky-500 bg-sky-950/40 text-white font-medium";
-        sdxlBtn.className = "p-3 rounded-lg border text-left transition border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200";
+        fluxBtn.className = "p-3 rounded-lg border text-left transition border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-white font-medium";
+        sdxlBtn.className = "p-3 rounded-lg border text-left transition border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200";
         negBox.classList.add('hidden');
         fluxGuide.classList.remove('hidden');
       } else {
-        sdxlBtn.className = "p-3 rounded-lg border text-left transition border-sky-500 bg-sky-950/40 text-white font-medium";
-        fluxBtn.className = "p-3 rounded-lg border text-left transition border-slate-800 bg-slate-950/40 text-slate-400 hover:text-slate-200";
+        sdxlBtn.className = "p-3 rounded-lg border text-left transition border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-white font-medium";
+        fluxBtn.className = "p-3 rounded-lg border text-left transition border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200";
         negBox.classList.remove('hidden');
         fluxGuide.classList.add('hidden');
       }
@@ -911,8 +1190,62 @@
       });
     }
 
+    function updateThemeUI(isDark) {
+      const sun = document.getElementById('theme-sun-icon');
+      const moon = document.getElementById('theme-moon-icon');
+      if (!sun || !moon) return;
+      if (isDark) {
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+      } else {
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('pacebowl-theme', 'light');
+        updateThemeUI(false);
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('pacebowl-theme', 'dark');
+        updateThemeUI(true);
+      }
+      initCalculator();
+      setModelMode(currentModel);
+    }
+
+    function updateLanguageUI() {
+      const label = document.getElementById('lang-label');
+      if (label) {
+        label.textContent = currentLang === 'zh' ? 'EN' : '中文';
+      }
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+          el.innerHTML = I18N[currentLang][key];
+        }
+      });
+      initCalculator();
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      localStorage.setItem('pacebowl-lang', currentLang);
+      updateLanguageUI();
+    }
+
     // Initialize
     window.addEventListener('DOMContentLoaded', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      updateThemeUI(isDark);
+      updateLanguageUI();
       initCalculator();
       randomSubject();
     });
