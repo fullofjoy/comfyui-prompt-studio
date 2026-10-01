@@ -1105,10 +1105,24 @@
       }, 2000);
     }
 
+    function trackAction(name, meta) {
+      try {
+        if (window.geotrace && typeof window.geotrace.track === 'function') {
+          window.geotrace.track(name, meta);
+        }
+      } catch(e) {}
+      try {
+        if (window.umami && typeof window.umami.track === 'function') {
+          window.umami.track(name, meta);
+        }
+      } catch(e) {}
+    }
+
     function copyOutput(id) {
       const el = document.getElementById(id);
       navigator.clipboard.writeText(el.value).then(() => {
         showToast('✓ Copied text for CLIP Text Encode!');
+        trackAction('copied_prompt', { target: id });
       });
     }
 
@@ -1116,6 +1130,7 @@
       const val = document.getElementById(id).value;
       navigator.clipboard.writeText(val).then(() => {
         showToast(`✓ Copied ${val}`);
+        trackAction('copied_value');
       });
     }
 
@@ -1125,6 +1140,7 @@
       if (type === 'resolution') {
         navigator.clipboard.writeText(`${w}x${h}`).then(() => {
           showToast(`✓ Copied "${w}x${h}"`);
+          trackAction('copied_resolution', { resolution: `${w}x${h}` });
         });
       } else if (type === 'json') {
         const jsonStr = JSON.stringify({
@@ -1137,6 +1153,7 @@
         }, null, 2);
         navigator.clipboard.writeText(jsonStr).then(() => {
           showToast('✓ Copied EmptyLatentImage JSON!');
+          trackAction('copied_json');
         });
       }
     }
@@ -1175,6 +1192,7 @@
 
       navigator.clipboard.writeText(JSON.stringify(comfyPayload, null, 2)).then(() => {
         showToast('⚡ EmptyLatent node copied! Press Ctrl+V in ComfyUI');
+        trackAction('copied_node', { type: 'EmptyLatentImage' });
         const btn = document.getElementById('node-latent-btn');
         if (btn) {
           const orig = btn.innerHTML;
@@ -1224,6 +1242,7 @@
 
       navigator.clipboard.writeText(JSON.stringify(comfyClipPayload, null, 2)).then(() => {
         showToast('⚡ CLIP node copied! Press Ctrl+V in ComfyUI');
+        trackAction('copied_node', { type: 'CLIPTextEncode' });
         const btn = document.getElementById('clip-node-btn');
         if (btn) {
           const orig = btn.innerHTML;
