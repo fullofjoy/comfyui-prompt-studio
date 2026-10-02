@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Generate High-Fidelity ComfyUI Prompts for Flux.1 and SDXL: The 2026 Guide</title>
+  <meta name="description" content="Master prompt engineering for ComfyUI. Learn how to write descriptive T5 natural language for Flux.1, handle dual CLIP Text Encode nodes, and export LiteGraph nodes directly to canvas with our free ComfyUI prompt generator.">
+  <meta name="keywords" content="comfyui prompt generator, how to generate comfyui prompts, flux prompt generator, comfyui prompt builder, comfyui clip text encode, comfyui workflow prompt">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://comfy.pacebowl.com/blog/how-to-generate-comfyui-prompts.html">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Umami Analytics -->
+  <script defer src="https://umami-ruby-alpha-96.vercel.app/script.js" data-website-id="f19f74d0-d931-45d2-9e84-64626b9e7409"></script>
+
+  <!-- OpenGEO (GeoTrace) Attribution -->
+  <script defer data-domain="comfy.pacebowl.com" data-api="https://geo.pacebowl.com/api" src="https://geo.pacebowl.com/geo.js"></script>
+
+  <!-- Theme & Language Initialization: Anti-FOUC & Cross-Subdomain Sync -->
+  <script>
+    (function() {
+      function getSharedCookie(name) {
+        var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      var theme = getSharedCookie('pacebowl-theme') || localStorage.getItem('pacebowl-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://comfy.pacebowl.com/blog/how-to-generate-comfyui-prompts.html">
+  <meta property="og:title" content="How to Generate High-Fidelity ComfyUI Prompts for Flux.1 and SDXL">
+  <meta property="og:description" content="The definitive engineering guide on ComfyUI prompt crafting, T5 prose architecture, and 1-click canvas node injection.">
+  <meta property="og:image" content="https://comfy.pacebowl.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://comfy.pacebowl.com/blog/how-to-generate-comfyui-prompts.html">
+  <meta name="twitter:title" content="How to Generate High-Fidelity ComfyUI Prompts for Flux.1 and SDXL">
+  <meta name="twitter:description" content="The definitive engineering guide on ComfyUI prompt crafting, T5 prose architecture, and 1-click canvas node injection.">
+  <meta name="twitter:image" content="https://comfy.pacebowl.com/og-image.png">
+
+  <!-- Structured Data: TechArticle, FAQPage & Breadcrumbs -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "How to Generate High-Fidelity ComfyUI Prompts for Flux.1 and SDXL: The 2026 Guide",
+        "description": "Comprehensive runbook detailing how to construct natural language prompts for ComfyUI workflows, manage CLIP Text Encode nodes, and prevent VRAM exhaustion with web-based prompt generators.",
+        "inLanguage": "en",
+        "author": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        },
+        "datePublished": "2026-10-03",
+        "dateModified": "2026-10-03",
+        "publisher": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What makes a ComfyUI prompt generator different from a Midjourney prompt builder?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "ComfyUI utilizes discrete physical node architectures (CLIP Text Encode, Conditioning, Empty Latent Image). Prompts must be tailored to the specific text encoder: Flux.1 uses T5-XXL natural prose paragraphs with zero negative prompt nodes, whereas SDXL requires dual-clip token weighting."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do you copy prompts directly into the ComfyUI canvas as nodes?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PaceBowl ComfyUI Studio provides a 'Copy CLIP Node (Canvas Ctrl+V)' button. It converts your formatted prompt into LiteGraph serialized node JSON. Switch to your ComfyUI browser tab and press Ctrl+V to paste the pre-configured CLIP Text Encode node instantly onto your canvas."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why should you use an external web tool to generate ComfyUI prompts?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Running local LLMs (like Ollama or Qwen) alongside Flux.1 dev (which already consumes 12GB-24GB VRAM) inevitably causes CUDA Out of Memory (OOM) crashes. Running prompt generation in a lightweight browser tab on your second monitor offloads 100% of LLM compute to the browser CPU."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://comfy.pacebowl.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "https://comfy.pacebowl.com/blog/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "How to Generate ComfyUI Prompts",
+            "item": "https://comfy.pacebowl.com/blog/how-to-generate-comfyui-prompts.html"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0284c7', 600: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    html.dark ::-webkit-scrollbar-track { background: #07090e; }
+    html.dark ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    html.light ::-webkit-scrollbar-track { background: #f8fafc; }
+    html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#07090e] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#07090e]/80 backdrop-blur sticky top-0 z-40 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="https://pacebowl.com" class="text-xs font-mono text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm" title="Back to PaceBowl Mothership">
+          <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+          <span>PaceBowl</span>
+        </a>
+        <span class="text-slate-400 dark:text-slate-600 font-mono">/</span>
+        <a href="/" class="font-bold text-slate-900 dark:text-white hover:text-sky-600 dark:hover:text-sky-400 transition text-sm">
+          ComfyUI <span class="text-sky-600 dark:text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-500/30">Studio</span>
+        </a>
+        <span class="text-slate-400 dark:text-slate-600 font-mono">/</span>
+        <a href="/blog/" class="text-xs text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition" data-i18n="nav_blog">Blog</a>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle English / 简体中文">
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="lang-label" class="font-semibold font-mono text-[11px]">中文</span>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle Light / Dark mode">
+          <svg id="theme-sun-icon" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <a href="/" class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-sm shadow-sky-500/20 transition" data-i18n="nav_generator">
+          Prompt Generator →
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Article Container -->
+  <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 w-full py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex text-xs text-slate-500 mb-6 font-mono" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-2">
+        <li><a href="/" class="hover:text-sky-600 dark:hover:text-sky-400">Home</a></li>
+        <li><span>/</span></li>
+        <li><a href="/blog/" class="hover:text-sky-600 dark:hover:text-sky-400">Blog</a></li>
+        <li><span>/</span></li>
+        <li class="text-slate-700 dark:text-slate-300 font-medium">How to Generate ComfyUI Prompts</li>
+      </ol>
+    </nav>
+
+    <!-- Header Block -->
+    <div class="mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-xs mb-4 font-mono font-semibold">
+        <span data-i18n="badge_tag">COMFYUI WORKFLOW GUIDE 2026</span>
+        <span>•</span>
+        <span data-i18n="badge_read">6 min read</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4" data-i18n="article_h1">
+        How to Generate High-Fidelity ComfyUI Prompts for Flux.1 and SDXL
+      </h1>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed" data-i18n="article_intro">
+        If you are still pasting comma-separated tags like "masterpiece, 8k resolution, best quality" into ComfyUI's CLIP Text Encode node for Flux.1, your generations are suffering. Here is the modern runbook for generating state-of-the-art ComfyUI prompts, understanding text encoders, and pasting nodes directly to canvas.
+      </p>
+    </div>
+
+    <!-- Quick CTA Banner -->
+    <div class="mb-10 p-5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-teal-500/10 border border-sky-300 dark:border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500 text-slate-950 flex items-center justify-center font-bold text-lg shrink-0">⚡</div>
+        <div>
+          <h4 class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="banner_cta_title">Build ComfyUI Prompts Online Without Installing Nodes</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5" data-i18n="banner_cta_desc">Use our free visual ComfyUI prompt generator to compose T5 paragraphs, match 1MP buckets, and 1-click copy nodes.</p>
+        </div>
+      </div>
+      <a href="/" class="shrink-0 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/20 transition flex items-center gap-1.5" data-i18n="banner_cta_btn">
+        Open Prompt Generator →
+      </a>
+    </div>
+
+    <!-- Article Content -->
+    <article class="prose dark:prose-invert max-w-none space-y-10 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+
+      <!-- Section 1 -->
+      <section class="space-y-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white" data-i18n="sec1_title">
+          1. Why ComfyUI Prompting is Fundamentally Different
+        </h2>
+        <p data-i18n="sec1_p1">
+          In monolithic WebUIs like Automatic1111 or Fooocus, the user interfaces mask what happens under the hood. In ComfyUI, you interact directly with the computational graph. Your prompt text does not just go into an ambiguous "text box"—it feeds into a specific <strong>CLIP Text Encode</strong> node, which converts string tokens into conditioning tensors via an explicit text encoder model.
+        </p>
+        <p data-i18n="sec1_p2">
+          When dealing with modern diffusion architectures like <strong>Black Forest Labs' Flux.1</strong> (Schnell and Dev), the text conditioning is handled primarily by <strong>T5-XXL</strong>, a 4.8-billion parameter encoder trained on vast natural language datasets.
+        </p>
+        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
+          <div class="font-bold text-slate-900 dark:text-white" data-i18n="box1_title">⚠️ The Critical WebUI Syntax Trap in ComfyUI:</div>
+          <p class="text-slate-600 dark:text-slate-400" data-i18n="box1_desc">
+            Writing <code>&lt;lora:my_character:0.8&gt;</code> inside a ComfyUI CLIP Text Encode box does absolutely nothing. In native ComfyUI, LoRAs must be physically routed through a <strong>Load LoRA</strong> node on the canvas. Vanilla CLIP nodes will treat <code>&lt;lora:...&gt;</code> as literal nonsense text!
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="space-y-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white" data-i18n="sec2_title">
+          2. The Modern 4-Pillar ComfyUI Prompt Structure
+        </h2>
+        <p data-i18n="sec2_p1">
+          To achieve photorealistic lighting, cohesive anatomy, and cinematic framing, your prompt should follow an explicit narrative hierarchy rather than random comma soup:
+        </p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="font-bold text-sky-600 dark:text-sky-400 mb-1" data-i18n="p1_title">Pillar 1: Subject & Kinetic Action</div>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="p1_desc">
+              Describe who/what the subject is, their physical posture, expression, and dynamic action (e.g., <em>"A weathered female astronaut adjusting her helmet visor while kneeling on crimson dust"</em>).
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="font-bold text-sky-600 dark:text-sky-400 mb-1" data-i18n="p2_title">Pillar 2: Camera Lens & Texture</div>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="p2_desc">
+              Specify real focal lengths and emulsion grains instead of buzzwords (e.g., <em>"Shot on 85mm f/1.4 lens with shallow depth of field, creamy background bokeh, Kodak Portra 400 film grain"</em>).
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="font-bold text-sky-600 dark:text-sky-400 mb-1" data-i18n="p3_title">Pillar 3: Lighting Direction & Atmosphere</div>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="p3_desc">
+              Dictate volumetric atmosphere and light decay (e.g., <em>"Low golden hour sun casting long cinematic shadows, subtle dust motes floating in diagonal light beams"</em>).
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="font-bold text-sky-600 dark:text-sky-400 mb-1" data-i18n="p4_title">Pillar 4: Material & Micro-Details</div>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="p4_desc">
+              Highlight tactile surface properties (e.g., <em>"Visible skin pores, sub-surface scattering along the ear contours, scratched polycarbonate on the visor surface"</em>).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Flux vs SDXL Comparison -->
+      <section class="space-y-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white" data-i18n="sec3_title">
+          3. Flux.1 vs SDXL: How Prompt Engines Differ
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse border border-slate-200 dark:border-slate-800">
+            <thead>
+              <tr class="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                <th class="p-3 font-bold text-slate-900 dark:text-white">Feature</th>
+                <th class="p-3 font-bold text-sky-600 dark:text-sky-400">Flux.1 (T5-XXL)</th>
+                <th class="p-3 font-bold text-indigo-600 dark:text-indigo-400">SDXL 1.0 (CLIP L + G)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+              <tr>
+                <td class="p-3 font-semibold">Prompt Grammar</td>
+                <td class="p-3">Continuous descriptive sentences</td>
+                <td class="p-3">Comma-separated tag fragments</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold">Negative Prompt</td>
+                <td class="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">None (leave unplugged)</td>
+                <td class="p-3">Mandatory (ugly, deformed, bad hands)</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold">Emphasis Syntax</td>
+                <td class="p-3">Adjectives ("intensely vibrant")</td>
+                <td class="p-3">(keyword:1.2) parentheses weights</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold">Recommended Steps</td>
+                <td class="p-3">Dev: 20-25 | Schnell: 4</td>
+                <td class="p-3">30-40 steps</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 4: 1-Click Canvas Node Copying -->
+      <section class="space-y-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white" data-i18n="sec4_title">
+          4. Zero VRAM Overhead: Using an Online Generator
+        </h2>
+        <p data-i18n="sec4_p1">
+          A common frustration among AI creators is running local LLMs (like Ollama, Mistral, or Qwen) to brainstorm prompts. When you run a 7B local language model while ComfyUI has a 12GB Flux.1 checkpoint loaded into VRAM, your operating system will either thrash virtual memory or trigger a catastrophic <strong>CUDA Out of Memory</strong> crash.
+        </p>
+        <p data-i18n="sec4_p2">
+          By utilizing <a href="/" class="text-sky-600 dark:text-sky-400 font-bold hover:underline">PaceBowl ComfyUI Prompt Studio</a> in a second browser window, prompt compilation happens entirely on client-side CPU without touching a single byte of your GPU memory.
+        </p>
+        <div class="p-4 rounded-xl bg-gradient-to-r from-sky-950/40 to-slate-950/60 border border-sky-500/30 text-xs space-y-2">
+          <div class="flex items-center gap-2 font-bold text-sky-300">
+            <span>⚡</span>
+            <span data-i18n="trick_title">The "Copy Node (Canvas Ctrl+V)" Secret</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed" data-i18n="trick_desc">
+            Instead of copying text and opening ComfyUI to paste into a tiny text box, click <strong>"⚡ Copy Node (Canvas Ctrl+V)"</strong> in PaceBowl. It writes the pre-configured serialized LiteGraph node JSON to your clipboard. Then click anywhere on your ComfyUI workspace and hit <strong>Ctrl+V</strong>: a brand-new CLIP Text Encode node with your formatted prompt appears immediately on your canvas!
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 5: FAQ -->
+      <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="faq_heading">Frequently Asked Questions</h2>
+        
+        <div class="space-y-3">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-1" data-i18n="q1">Can I use this ComfyUI prompt generator on mobile devices?</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="a1">
+              Yes! PaceBowl ComfyUI Studio is 100% responsive and client-side. Many creators brainstorm prompts on their phone or tablet during commutes, click copy, and paste them into their remote ComfyUI instance later.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-1" data-i18n="q2">What sampler works best with Flux prompts in ComfyUI?</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="a2">
+              For Flux.1 Dev, the standard configuration is the <strong>euler</strong> sampler paired with the <strong>simple</strong> or <strong>beta</strong> scheduler, using 20–25 steps and a Guidance Scale of 3.5.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </article>
+
+    <!-- Matrix Backlink Navigation -->
+    <div class="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white" data-i18n="matrix_title">Explore The PaceBowl Developer Matrix</h3>
+        <a href="https://pacebowl.com" class="text-xs text-sky-600 dark:text-sky-400 hover:underline">All Tools →</a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <a href="/" class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-sky-500 transition bg-white dark:bg-slate-900/60 flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-sky-600 text-white font-bold flex items-center justify-center text-[10px]">CF</span>
+          <div>
+            <div class="font-bold text-slate-900 dark:text-white">ComfyUI Prompt Studio</div>
+            <div class="text-[10px] text-slate-500">Flux & Latent Speedup Calc</div>
+          </div>
+        </a>
+        <a href="https://cursor.pacebowl.com" class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 transition bg-white dark:bg-slate-900/60 flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">CR</span>
+          <div>
+            <div class="font-bold text-slate-900 dark:text-white">Cursor Rules Studio</div>
+            <div class="text-[10px] text-slate-500">.cursor/rules/*.mdc Generator</div>
+          </div>
+        </a>
+        <a href="https://hot.pacebowl.com" class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-rose-500 transition bg-white dark:bg-slate-900/60 flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-rose-600 text-white font-bold flex items-center justify-center text-[10px]">🔥</span>
+          <div>
+            <div class="font-bold text-slate-900 dark:text-white">AI Radar & Hotlist</div>
+            <div class="text-[10px] text-slate-500">24/7 Frontier Model Tracker</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#07090e] py-8 text-center text-xs text-slate-500 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span>PaceBowl Studio &copy; 2026. Part of the <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Ecosystem</a>.</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="/" class="hover:text-slate-900 dark:hover:text-slate-200 transition">Studio</a>
+        <a href="/blog/" class="hover:text-slate-900 dark:hover:text-slate-200 transition">Blog</a>
+        <a href="https://github.com/comfyanonymous/ComfyUI" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-slate-200 transition">ComfyUI GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    const I18N = {
+      en: {
+        nav_blog: 'Blog',
+        nav_generator: 'Prompt Generator →',
+        badge_tag: 'COMFYUI WORKFLOW GUIDE 2026',
+        badge_read: '6 min read',
+        article_h1: 'How to Generate High-Fidelity ComfyUI Prompts for Flux.1 and SDXL',
+        article_intro: 'If you are still pasting comma-separated tags like "masterpiece, 8k resolution, best quality" into ComfyUI\'s CLIP Text Encode node for Flux.1, your generations are suffering. Here is the modern runbook for generating state-of-the-art ComfyUI prompts, understanding text encoders, and pasting nodes directly to canvas.',
+        banner_cta_title: 'Build ComfyUI Prompts Online Without Installing Nodes',
+        banner_cta_desc: 'Use our free visual ComfyUI prompt generator to compose T5 paragraphs, match 1MP buckets, and 1-click copy nodes.',
+        banner_cta_btn: 'Open Prompt Generator →',
+        sec1_title: '1. Why ComfyUI Prompting is Fundamentally Different',
+        sec1_p1: 'In monolithic WebUIs like Automatic1111 or Fooocus, the user interfaces mask what happens under the hood. In ComfyUI, you interact directly with the computational graph. Your prompt text does not just go into an ambiguous "text box"—it feeds into a specific CLIP Text Encode node, which converts string tokens into conditioning tensors via an explicit text encoder model.',
+        sec1_p2: 'When dealing with modern diffusion architectures like Black Forest Labs\' Flux.1 (Schnell and Dev), the text conditioning is handled primarily by T5-XXL, a 4.8-billion parameter encoder trained on vast natural language datasets.',
+        box1_title: '⚠️ The Critical WebUI Syntax Trap in ComfyUI:',
+        box1_desc: 'Writing <lora:my_character:0.8> inside a ComfyUI CLIP Text Encode box does absolutely nothing. In native ComfyUI, LoRAs must be physically routed through a Load LoRA node on the canvas. Vanilla CLIP nodes will treat <lora:...> as literal nonsense text!',
+        sec2_title: '2. The Modern 4-Pillar ComfyUI Prompt Structure',
+        sec2_p1: 'To achieve photorealistic lighting, cohesive anatomy, and cinematic framing, your prompt should follow an explicit narrative hierarchy rather than random comma soup:',
+        p1_title: 'Pillar 1: Subject & Kinetic Action',
+        p1_desc: 'Describe who/what the subject is, their physical posture, expression, and dynamic action (e.g., "A weathered female astronaut adjusting her helmet visor while kneeling on crimson dust").',
+        p2_title: 'Pillar 2: Camera Lens & Texture',
+        p2_desc: 'Specify real focal lengths and emulsion grains instead of buzzwords (e.g., "Shot on 85mm f/1.4 lens with shallow depth of field, creamy background bokeh, Kodak Portra 400 film grain").',
+        p3_title: 'Pillar 3: Lighting Direction & Atmosphere',
+        p3_desc: 'Dictate volumetric atmosphere and light decay (e.g., "Low golden hour sun casting long cinematic shadows, subtle dust motes floating in diagonal light beams").',
+        p4_title: 'Pillar 4: Material & Micro-Details',
+        p4_desc: 'Highlight tactile surface properties (e.g., "Visible skin pores, sub-surface scattering along the ear contours, scratched polycarbonate on the visor surface").',
+        sec3_title: '3. Flux.1 vs SDXL: How Prompt Engines Differ',
+        sec4_title: '4. Zero VRAM Overhead: Using an Online Generator',
+        sec4_p1: 'A common frustration among AI creators is running local LLMs (like Ollama, Mistral, or Qwen) to brainstorm prompts. When you run a 7B local language model while ComfyUI has a 12GB Flux.1 checkpoint loaded into VRAM, your operating system will either thrash virtual memory or trigger a catastrophic CUDA Out of Memory crash.',
+        sec4_p2: 'By utilizing PaceBowl ComfyUI Prompt Studio in a second browser window, prompt compilation happens entirely on client-side CPU without touching a single byte of your GPU memory.',
+        trick_title: 'The "Copy Node (Canvas Ctrl+V)" Secret',
+        trick_desc: 'Instead of copying text and opening ComfyUI to paste into a tiny text box, click "⚡ Copy Node (Canvas Ctrl+V)" in PaceBowl. It writes the pre-configured serialized LiteGraph node JSON to your clipboard. Then click anywhere on your ComfyUI workspace and hit Ctrl+V: a brand-new CLIP Text Encode node with your formatted prompt appears immediately on your canvas!',
+        faq_heading: 'Frequently Asked Questions',
+        q1: 'Can I use this ComfyUI prompt generator on mobile devices?',
+        a1: 'Yes! PaceBowl ComfyUI Studio is 100% responsive and client-side. Many creators brainstorm prompts on their phone or tablet during commutes, click copy, and paste them into their remote ComfyUI instance later.',
+        q2: 'What sampler works best with Flux prompts in ComfyUI?',
+        a2: 'For Flux.1 Dev, the standard configuration is the euler sampler paired with the simple or beta scheduler, using 20–25 steps and a Guidance Scale of 3.5.',
+        matrix_title: 'Explore The PaceBowl Developer Matrix'
+      },
+      zh: {
+        nav_blog: '博客',
+        nav_generator: '提示词生成器 →',
+        badge_tag: 'COMFYUI 实战指南 2026',
+        badge_read: '6 分钟深度阅读',
+        article_h1: '如何为 Flux.1 与 SDXL 生成高画质 ComfyUI 提示词：2026 工业级实战',
+        article_intro: '如果你还在把 “masterpiece, 8k resolution, best quality” 这种逗号堆砌标签填进 ComfyUI 的 CLIP 文本编码节点，你的 Flux 出图质量正在大打折扣。本文将深度解析 ComfyUI 提示词生成底层逻辑、双文本编码器差异，以及如何一键将节点粘贴至画布。',
+        banner_cta_title: '无需在本地安装节点，在线可视化生成 ComfyUI 提示词',
+        banner_cta_desc: '使用我们免费的 ComfyUI 提示词生成器，可视化拼接 T5 自然语言长文本，匹配 100 万像素黄金分桶，1 键复制节点。',
+        banner_cta_btn: '打开提示词工坊 →',
+        sec1_title: '1. 为什么 ComfyUI 的提示词逻辑与传统 WebUI 截然不同？',
+        sec1_p1: '在诸如 Automatic1111 或 Fooocus 这类一体化 WebUI 中，界面隐藏了大量底层细节。而在 ComfyUI 中，你是在直接操作计算图。你的提示词不仅是一个输入框，而是直接馈入特定的 CLIP Text Encode 节点，由文本编码器将其转化为 Conditioning 条件张量。',
+        sec1_p2: '对于以 Flux.1 (Schnell / Dev) 为代表的新一代扩散模型，文本理解主要由高达 48 亿参数的 T5-XXL 编码器接管，它彻底摒弃了破碎的逗号标签，具备完备的英语句法理解力。',
+        box1_title: '⚠️ ComfyUI 中最常见的 WebUI 语法致命误区：',
+        box1_desc: '在 ComfyUI 的 CLIP 文本框里输入 <lora:my_character:0.8> 是完全无效的！在原生 ComfyUI 中，LoRA 必须通过画布上的实体 Load LoRA 节点串联进模型连线。原生 CLIP 节点只会把这段英文当成毫无意义的垃圾文本。',
+        sec2_title: '2. 现代 ComfyUI 提示词的 4 大黄金骨架',
+        sec2_p1: '想要获得顶级的皮肤质感、光影衰减与电影级焦段透视，提示词必须遵循清晰的叙事层级，而不是杂乱的标签拼凑：',
+        p1_title: '支柱 1：画面主体与动态动作',
+        p1_desc: '具体描述主体是谁、身姿体态、面部情绪与正在进行的动作（例如：“一位饱经风霜的女性宇航员跪在猩红沙尘中调整头盔面罩”）。',
+        p2_title: '支柱 2：摄影焦段与胶片质感',
+        p2_desc: '指明真实的镜头物理规格与感光胶片，代替空洞的“超清”形容词（例如：“85mm f/1.4 人像大光圈浅景深，柯达 Portra 400 经典胶片颗粒”）。',
+        p3_title: '支柱 3：光影走向与场景氛围',
+        p3_desc: '刻画丁达尔体积光、斜射暖阳与光线衰减（例如：“黄金时刻低角度夕阳拉出长长的阴影，斜射光柱中浮动着细微的尘埃颗粒”）。',
+        p4_title: '支柱 4：材质质感与微观细节',
+        p4_desc: '突出触感与微观物理属性（例如：“清晰的面部皮肤毛孔、耳廓轮廓的次表面透光感 SSS、聚碳酸酯面罩上的细微划痕”）。',
+        sec3_title: '3. Flux.1 与 SDXL：双模型提示词引擎核心差异',
+        sec4_title: '4. 零显存开销：为什么要把提示词生成放在独立网页端？',
+        sec4_p1: '许多创作者习惯在本地启动 Ollama 或 Qwen 等大模型来辅助写提示词。但本地运行的 7B 大模型会与 12GB~24GB 的 Flux.1 产生恶性显存争抢，极易遭遇 CUDA Out of Memory 显存爆满崩溃。',
+        sec4_p2: '在副屏使用 PaceBowl ComfyUI 提示词工坊，所有自然语言编排与潜空间计算都在浏览器 CPU 端毫秒级完成，完全不占用你的 GPU 显存。',
+        trick_title: '独门秘籍：“⚡ 复制节点 (画布 Ctrl+V 粘贴)”',
+        trick_desc: '不要再手动复制代码回 ComfyUI 文本框粘贴！在 PaceBowl 界面点击“⚡ 复制节点”，系统会自动将配置好的 LiteGraph 节点序列化为 JSON 写入剪贴板。切换到 ComfyUI 网页画布按下 Ctrl+V，一个预置好全部正向提示词的 CLIP Text Encode 节点就会直接降临在画布上！',
+        faq_heading: '常见技术问题解答',
+        q1: '可以在手机或平板上使用这个提示词生成器吗？',
+        a1: '完全可以！PaceBowl 采用 100% 纯客户端自适应布局。很多创作者在通勤时用手机生成提示词并一键复制，远程发送到工作站生成。',
+        q2: 'Flux 模型在 ComfyUI 中推荐什么采样器？',
+        a2: '推荐使用 euler 采样器搭配 simple 或 beta 调度器，Dev 模型 20–25 步，Schnell 模型 4 步，Guidance Scale 设为 3.5。',
+        matrix_title: '探索 PaceBowl 开发者生产力工具矩阵'
+      }
+    };
+
+    // Shared State Protocol
+    function getSharedCookie(name) {
+      var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+
+    function setSharedState(key, val) {
+      try { localStorage.setItem(key, val); } catch(e) {}
+      try {
+        var hostname = window.location.hostname;
+        var domain = (hostname.endsWith('pacebowl.com') || hostname === 'pacebowl.com') ? '; domain=.pacebowl.com' : '';
+        document.cookie = key + '=' + encodeURIComponent(val) + domain + '; path=/; max-age=31536000; SameSite=Lax';
+      } catch(e) {}
+    }
+
+    function getSharedTheme() {
+      var t = getSharedCookie('pacebowl-theme') || localStorage.getItem('pacebowl-theme');
+      if (t === 'light' || t === 'dark') return t;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function getSharedLang() {
+      var l = getSharedCookie('pacebowl-lang') || localStorage.getItem('pacebowl-lang');
+      if (l === 'zh' || l === 'en') return l;
+      return (navigator.language && navigator.language.startsWith('zh')) ? 'zh' : 'en';
+    }
+
+    let currentLang = getSharedLang();
+
+    function updateThemeUI(isDark) {
+      const sun = document.getElementById('theme-sun-icon');
+      const moon = document.getElementById('theme-moon-icon');
+      if (!sun || !moon) return;
+      if (isDark) {
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+      } else {
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
+      }
+    }
+
+    function applyTheme(isDark, persist) {
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        if (persist) setSharedState('pacebowl-theme', 'dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        if (persist) setSharedState('pacebowl-theme', 'light');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark, true);
+    }
+
+    function updateLanguageUI() {
+      const label = document.getElementById('lang-label');
+      if (label) {
+        label.textContent = currentLang === 'zh' ? 'EN' : '中文';
+      }
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+          el.innerHTML = I18N[currentLang][key];
+        }
+      });
+    }
+
+    function applyLanguage(lang, persist) {
+      currentLang = lang;
+      if (persist) setSharedState('pacebowl-lang', lang);
+      updateLanguageUI();
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage(nextLang, true);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const theme = getSharedTheme();
+      applyTheme(theme === 'dark', false);
+      applyLanguage(getSharedLang(), false);
+    });
+  </script>
+</body>
+</html>
