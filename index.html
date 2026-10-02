@@ -544,6 +544,36 @@
           </p>
         </div>
 
+        <!-- Cloud GPU Run & Sponsoring Card (Affiliate / 1-Click Launch) -->
+        <div class="mt-4 p-5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border border-sky-400/30 dark:border-sky-500/30 shadow-lg shadow-sky-500/5">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md shrink-0">
+                🚀
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="cloud_gpu_title">No High-End Local GPU? Run ComfyUI & Flux in the Cloud</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-semibold" data-i18n="cloud_gpu_badge">$5 Free Credits</span>
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed" data-i18n="cloud_gpu_desc">
+                  Launch Flux.1 Schnell / Dev on 24GB–48GB VRAM (RTX 4090 / A100) instantly with pre-configured ComfyUI templates. Zero local setup or OOM crashes.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+              <a href="https://runpod.io?ref=pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="click-cloud-gpu-runpod" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-1.5">
+                <span>⚡ Launch on RunPod</span>
+                <span>↗</span>
+              </a>
+              <a href="https://fal.ai/?ref=pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="click-cloud-gpu-fal" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition flex items-center justify-center gap-1.5">
+                <span>fal.ai API</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -588,20 +618,56 @@
       </div>
     </div>
 
-    <!-- PaceBowl Matrix Companion Banner -->
-    <div class="mt-8 p-4 rounded-xl bg-gradient-to-r from-slate-100 via-indigo-50/50 to-slate-100 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-indigo-500/5 transition-colors duration-200">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm shrink-0">
-          ⚡
-        </div>
+    <!-- RelNav: PaceBowl Ecosystem Matrix Grid (Inspired by seo.web.cafe) -->
+    <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800/80">
+      <div class="flex items-center justify-between mb-5">
         <div>
-          <div class="text-xs font-bold text-slate-900 dark:text-white" data-i18n="banner_title">Also in the PaceBowl Suite: Cursor Rules Generator (.mdc)</div>
-          <div class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5" data-i18n="banner_desc">Build modular, path-scoped .cursor/rules/*.mdc configuration files with Next.js 15, FastAPI, and Supabase presets.</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+            <span data-i18n="relnav_title">Explore PaceBowl Suite Matrix</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" data-i18n="relnav_sub">Zero-friction client-side power tools crafted for the modern AI workflow.</p>
         </div>
+        <a href="https://pacebowl.com" class="text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium hidden sm:inline" data-i18n="relnav_hub">Mothership Hub →</a>
       </div>
-      <a href="https://cursor.pacebowl.com" class="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-sm shadow-indigo-600/20" data-i18n="banner_btn">
-        Open Cursor Studio →
-      </a>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Card 1: Cursor Rules -->
+        <a href="https://cursor.pacebowl.com" data-umami-event="relnav-click-cursor" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-indigo-500/60 transition group flex flex-col justify-between shadow-xs">
+          <div class="flex items-center gap-3 mb-2.5">
+            <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">CR</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-400 transition" data-i18n="rel_cr_title">Cursor Rules Studio</h4>
+              <span class="text-[10px] font-mono text-slate-500">cursor.pacebowl.com</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="rel_cr_desc">Modular .cursor/rules/*.mdc generator with Next.js 15, FastAPI, and strict guardrails.</p>
+        </a>
+
+        <!-- Card 2: AI Radar & Hotlist -->
+        <a href="https://hot.pacebowl.com" data-umami-event="relnav-click-hot" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-rose-500/60 transition group flex flex-col justify-between shadow-xs">
+          <div class="flex items-center gap-3 mb-2.5">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white text-base shadow-sm">🔥</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-rose-400 transition" data-i18n="rel_hot_title">AI Radar & Hotlist</h4>
+              <span class="text-[10px] font-mono text-slate-500">hot.pacebowl.com</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="rel_hot_desc">24/7 automated tech radar tracking frontier papers, LLM releases, and daily AI digests.</p>
+        </a>
+
+        <!-- Card 3: OpenGEO Studio -->
+        <a href="https://geo.pacebowl.com" data-umami-event="relnav-click-geo" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-emerald-500/60 transition group flex flex-col justify-between shadow-xs">
+          <div class="flex items-center gap-3 mb-2.5">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">GEO</div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-400 transition" data-i18n="rel_geo_title">OpenGEO Attribution</h4>
+              <span class="text-[10px] font-mono text-slate-500">geo.pacebowl.com</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="rel_geo_desc">Track AI search referrals and revenue conversions from Perplexity, ChatGPT, and Claude.</p>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -738,6 +804,18 @@
         banner_title: 'Also in the PaceBowl Suite: Cursor Rules Generator (.mdc)',
         banner_desc: 'Build modular, path-scoped .cursor/rules/*.mdc configuration files with Next.js 15, FastAPI, and Supabase presets.',
         banner_btn: 'Open Cursor Studio →',
+        cloud_gpu_title: 'No High-End Local GPU? Run ComfyUI & Flux in the Cloud',
+        cloud_gpu_badge: '$5 Free Credits',
+        cloud_gpu_desc: 'Launch Flux.1 Schnell / Dev on 24GB–48GB VRAM (RTX 4090 / A100) instantly with pre-configured ComfyUI templates. Zero local setup or OOM crashes.',
+        relnav_title: 'Explore PaceBowl Suite Matrix',
+        relnav_sub: 'Zero-friction client-side power tools crafted for the modern AI workflow.',
+        relnav_hub: 'Mothership Hub →',
+        rel_cr_title: 'Cursor Rules Studio',
+        rel_cr_desc: 'Modular .cursor/rules/*.mdc generator with Next.js 15, FastAPI, and strict guardrails.',
+        rel_hot_title: 'AI Radar & Hotlist',
+        rel_hot_desc: '24/7 automated tech radar tracking frontier papers, LLM releases, and daily AI digests.',
+        rel_geo_title: 'OpenGEO Attribution',
+        rel_geo_desc: 'Track AI search referrals and revenue conversions from Perplexity, ChatGPT, and Claude.',
         footer_brand: 'PaceBowl &copy; 2026. Part of the <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Suite Matrix</a>.',
         footer_hot: '🔥 AI Radar',
         footer_cursor: '⚡ Cursor Rules',
@@ -855,6 +933,18 @@
         banner_title: 'PaceBowl 旗舰生态联动：Cursor Rules (.mdc) 规则工坊',
         banner_desc: '一键为 Next.js 15、FastAPI、Supabase 等全栈技术栈定制基于路径隔离的现代 .cursor/rules/*.mdc 模块化规则集。',
         banner_btn: '打开 Cursor 规则工坊 →',
+        cloud_gpu_title: '本地显卡显存不够？一键在云端 GPU 启动 ComfyUI & Flux',
+        cloud_gpu_badge: '领 $5 算力金',
+        cloud_gpu_desc: '在 24GB~48GB 大显存（RTX 4090 / A100）云端环境秒级启动 Flux.1 官方完整工作流。零本地配置，彻底告别 CUDA 爆显存。',
+        relnav_title: '探索 PaceBowl 生产力工具矩阵',
+        relnav_sub: '专为现代 AI 创作者与全栈工程师打造的零摩擦纯客户端工具箱。',
+        relnav_hub: '母舰大厅 →',
+        rel_cr_title: 'Cursor 规则工坊',
+        rel_cr_desc: 'Next.js 15、FastAPI 模块化 .mdc 规则生成器，彻底防止 AI 上下文膨胀。',
+        rel_hot_title: '科技热榜 · AI Radar',
+        rel_hot_desc: '24h 全天候自主追踪全球大模型突破、开源模型与前沿论文速报。',
+        rel_geo_title: 'OpenGEO 商业归因',
+        rel_geo_desc: '监控 Perplexity、ChatGPT、Claude 搜索引擎带来的流量与 Stripe 转化。',
         footer_brand: 'PaceBowl &copy; 2026. 隶属于 <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Suite 生态矩阵</a>。',
         footer_hot: '🔥 科技热榜',
         footer_cursor: '⚡ Cursor 规则',
