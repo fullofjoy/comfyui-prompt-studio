@@ -674,8 +674,8 @@
               <span data-i18n="gpu_calc_tip">Cloud pods run pre-configured ComfyUI with Flux.1 weights already cached.</span>
             </div>
             <div class="flex items-center gap-2.5 w-full sm:w-auto">
-              <a href="https://runpod.io?ref=pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="click-cloud-gpu-runpod" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-1.5">
-                <span>⚡ Run on RunPod ($5 Free Credits)</span>
+              <a href="/go/runpod" target="_blank" rel="noopener nofollow sponsored" data-umami-event="click-cloud-gpu-runpod" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-1.5">
+                <span data-i18n="gpu_calc_btn_runpod">⚡ Run on RunPod ($5 Free Credits)</span>
                 <span>↗</span>
               </a>
               <a href="https://fal.ai/?ref=pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="click-cloud-gpu-fal" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition flex items-center justify-center gap-1.5">
@@ -891,6 +891,9 @@
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
         <span data-i18n="footer_brand">PaceBowl &copy; 2026. Part of the <a href="https://pacebowl.com" class="text-sky-600 dark:text-sky-400 hover:underline">PaceBowl Suite Matrix</a>.</span>
+        <p class="text-[10px] text-slate-400/80 mt-1">
+          Disclosure: We may earn an affiliate commission when you register or purchase through partner links on our site at no additional cost to you.
+        </p>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-600 dark:text-slate-400">
         <a href="https://hot.pacebowl.com" class="hover:text-rose-500 dark:hover:text-rose-400 text-rose-600 dark:text-rose-300/80 transition font-medium" data-i18n="footer_hot">🔥 AI Radar</a>
@@ -1078,7 +1081,8 @@
         gpu_calc_row_cloud_time: 'Total Cloud Render:',
         gpu_calc_row_cloud_cost: 'Estimated Cloud Cost:',
         gpu_calc_row_cloud_oom: 'Native Stability:',
-        gpu_calc_tip: 'Cloud pods run pre-configured ComfyUI with Flux.1 weights already cached.'
+        gpu_calc_tip: 'Cloud pods run pre-configured ComfyUI with Flux.1 weights already cached.',
+        gpu_calc_btn_runpod: '⚡ Run on RunPod ($5 Free Credits)'
       },
       zh: {
         suite_btn: 'PaceBowl 套件',
@@ -1246,7 +1250,8 @@
         gpu_calc_row_cloud_time: '云端极速出图时长:',
         gpu_calc_row_cloud_cost: '整批预估算力成本:',
         gpu_calc_row_cloud_oom: '原生稳定性:',
-        gpu_calc_tip: '云端 Pod 已预置完整 ComfyUI 环境与 Flux 模型权重缓存，开箱即用。'
+        gpu_calc_tip: '云端 Pod 已预置完整 ComfyUI 环境与 Flux 模型权重缓存，开箱即用。',
+        gpu_calc_btn_runpod: '⚡ 领 $5 算力在 RunPod 运行'
       }
     };
 
@@ -1774,8 +1779,8 @@
       const batchCount = batchRange ? batchRange.value : '30';
 
       const report = currentLang === 'zh'
-        ? `📊 ComfyUI 生图算力与云端提速报告 (来自 comfy.pacebowl.com):\n• 本地显卡硬件: ${hwText}\n• 生图模型/步数: ${modelText}\n• 批量生成任务: ${batchCount} 张图片\n• 本地耗时: ${localTime} (风扇起飞 & 极易爆显存)\n• 云端耗时 (RTX 4090): ${cloudTime} (${cloudBadge})\n• 整批算力成本: 仅 ${cloudCost}\n• 立即领 $5 云算力金: https://runpod.io?ref=pacebowl\n• ComfyUI 潜空间计算器: https://comfy.pacebowl.com/`
-        : `📊 ComfyUI GPU Benchmark & Cloud ROI (via comfy.pacebowl.com):\n• Local Hardware: ${hwText}\n• Model: ${modelText}\n• Batch Render: ${batchCount} images\n• Local Time: ${localTime} (Fan 100%, high OOM crash risk)\n• Cloud Time (RTX 4090): ${cloudTime} (${cloudBadge})\n• Cloud Cost: Only ${cloudCost}\n• Claim $5 Free GPU Credits: https://runpod.io?ref=pacebowl\n• ComfyUI Latent Studio: https://comfy.pacebowl.com/`;
+        ? `📊 ComfyUI 生图算力与云端提速报告 (来自 comfy.pacebowl.com):\n• 本地显卡硬件: ${hwText}\n• 生图模型/步数: ${modelText}\n• 批量生成任务: ${batchCount} 张图片\n• 本地耗时: ${localTime} (风扇起飞 & 极易爆显存)\n• 云端耗时 (RTX 4090): ${cloudTime} (${cloudBadge})\n• 整批算力成本: 仅 ${cloudCost}\n• 立即领 $5 云算力金: https://comfy.pacebowl.com/go/runpod\n• ComfyUI 潜空间计算器: https://comfy.pacebowl.com/`
+        : `📊 ComfyUI GPU Benchmark & Cloud ROI (via comfy.pacebowl.com):\n• Local Hardware: ${hwText}\n• Model: ${modelText}\n• Batch Render: ${batchCount} images\n• Local Time: ${localTime} (Fan 100%, high OOM crash risk)\n• Cloud Time (RTX 4090): ${cloudTime} (${cloudBadge})\n• Cloud Cost: Only ${cloudCost}\n• Claim $5 Free GPU Credits: https://comfy.pacebowl.com/go/runpod\n• ComfyUI Latent Studio: https://comfy.pacebowl.com/`;
 
       navigator.clipboard.writeText(report).then(() => {
         const btn = document.getElementById('copy-gpu-report-btn');
