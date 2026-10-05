@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLUX.1 Schnell vs Dev: The Ultimate ComfyUI VRAM Optimization & Quantization Guide</title>
+  <meta name="description" content="Fix ComfyUI Out of Memory (OOM) errors running FLUX.1. Complete comparison between FLUX.1 Schnell vs Dev, VRAM quantization matrix (GGUF, NF4, FP8), and optimal configurations for 8GB, 12GB, and 24GB GPUs.">
+  <meta name="keywords" content="flux schnell vs dev comfyui, flux vram optimization, run flux on 8gb vram, flux gguf comfyui, flux nf4 checkpoint, comfyui out of memory flux">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://comfy.pacebowl.com/blog/flux-schnell-vs-dev-comfyui-vram-guide.html">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Umami Analytics -->
+  <script defer src="https://umami-ruby-alpha-96.vercel.app/script.js" data-website-id="f19f74d0-d931-45d2-9e84-64626b9e7409"></script>
+
+  <!-- Theme & Language Initialization: Anti-FOUC & Cross-Subdomain Sync -->
+  <script>
+    (function() {
+      function getSharedCookie(name) {
+        var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      var theme = getSharedCookie('pacebowl-theme') || localStorage.getItem('pacebowl-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://comfy.pacebowl.com/blog/flux-schnell-vs-dev-comfyui-vram-guide.html">
+  <meta property="og:title" content="FLUX.1 Schnell vs Dev: ComfyUI VRAM Optimization & Quantization Matrix">
+  <meta property="og:description" content="Master FLUX.1 on consumer GPUs. Schnell vs Dev differences, GGUF/NF4/FP8 benchmarks, and step-by-step OOM fixes for 8GB and 12GB cards.">
+  <meta property="og:image" content="https://comfy.pacebowl.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://comfy.pacebowl.com/blog/flux-schnell-vs-dev-comfyui-vram-guide.html">
+  <meta name="twitter:title" content="FLUX.1 Schnell vs Dev: ComfyUI VRAM Optimization & Quantization Matrix">
+  <meta name="twitter:description" content="Master FLUX.1 on consumer GPUs. Schnell vs Dev differences, GGUF/NF4/FP8 benchmarks, and step-by-step OOM fixes for 8GB and 12GB cards.">
+  <meta name="twitter:image" content="https://comfy.pacebowl.com/og-image.png">
+
+  <!-- Structured Data: TechArticle, FAQPage & Breadcrumbs -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "FLUX.1 Schnell vs Dev: The Ultimate ComfyUI VRAM Optimization & Quantization Guide",
+        "description": "Comprehensive runbook comparing FLUX.1 Schnell and Dev architectures, VRAM quantization formats (GGUF, NF4, FP8), and node configurations to prevent CUDA Out of Memory errors on 8GB, 12GB, and 24GB GPUs.",
+        "inLanguage": "en",
+        "author": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        },
+        "datePublished": "2026-10-06",
+        "dateModified": "2026-10-06",
+        "publisher": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the difference between FLUX.1 Schnell and FLUX.1 Dev?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "FLUX.1 Schnell is a 4-step distilled model released under Apache 2.0 (open for commercial use) requiring CFG 1.0. FLUX.1 Dev is a 20-28 step non-commercial guidance-distilled model (CFG 1.0 with Guidance Scale 3.5) offering significantly superior photorealism, fine typographic control, and nuanced skin micro-textures."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can you run FLUX.1 on an 8GB VRAM GPU without Out of Memory (OOM)?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. On an 8GB VRAM GPU (such as RTX 3070 or RTX 4060), use the GGUF Q4_K_S or Q4_0 quantized checkpoint paired with the t5xxl_fp8 or t5xxl_q4 text encoder and start ComfyUI with the '--lowvram' flag. This prevents GPU memory exhaustion by offloading the T5 language model to system RAM when sampling latents."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which FLUX quantization is best: GGUF, NF4, or FP8?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For 8GB cards, GGUF (Q4_K_S) is best due to dynamic layer offloading. For 12GB cards (RTX 3060/4070), NF4 (bitsandbytes) or GGUF Q8_0 is optimal, providing near-FP16 fidelity with zero OOM risk. For 16GB-24GB cards (RTX 4080/4090), native FP8 e4m3fn delivers the fastest generation speed with complete architectural fidelity."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why do I get 'CUDA out of memory' during the VAE decode step in ComfyUI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "FLUX uses a 16-channel VAE (ae.safetensors) that decodes large 1024x1024 latent tensors into high-res images, requiring up to 3GB of burst VRAM. If your GPU memory is nearly full after the KSampler step, the VAE allocation fails. Fix this by using 'VAEDecodeTiled' node or ensuring ComfyUI is launched with '--lowvram' so model weights are cleared from VRAM before VAE execution."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://comfy.pacebowl.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "https://comfy.pacebowl.com/blog/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "FLUX Schnell vs Dev VRAM Guide",
+            "item": "https://comfy.pacebowl.com/blog/flux-schnell-vs-dev-comfyui-vram-guide.html"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0284c7', 600: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    html.dark ::-webkit-scrollbar-track { background: #0f172a; }
+    html.dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    html.light ::-webkit-scrollbar-track { background: #f8fafc; }
+    html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#07090e] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#07090e]/80 backdrop-blur sticky top-0 z-50 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+        </div>
+        <span class="font-bold text-base text-slate-900 dark:text-white tracking-tight">PaceBowl <span class="text-sky-600 dark:text-sky-400 font-mono text-xs px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-500/30">ComfyUI</span></span>
+      </a>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle English / 简体中文">
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="lang-label" class="font-semibold font-mono text-[11px]">中文</span>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-400 text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle Light / Dark mode">
+          <svg id="theme-sun-icon" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <a href="/blog/" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="back_blog">← Back to Blog</a>
+        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 transition" data-i18n="launch_btn">Launch Studio</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- ENGLISH VERSION -->
+  <!-- ========================================== -->
+  <article id="article-en" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">Home</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">Blog</a>
+      <span>/</span>
+      <span class="text-sky-600 dark:text-sky-400">FLUX Schnell vs Dev VRAM Guide</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+        FLUX.1 Schnell vs Dev: The Ultimate ComfyUI VRAM Optimization & Quantization Guide
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+        <span>By PaceBowl Research Team</span>
+        <span>•</span>
+        <span>Updated October 2026</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 font-mono">8 min read</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-sky-900 dark:text-sky-200">Need exact FLUX 1MP Latent dimensions & 0-VRAM prompt assembly?</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">Copy EmptyLatent nodes and download ready-to-run ComfyUI workflows in 1 click.</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">Open Studio →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+      <!-- Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-sky-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ Direct Answer (TL;DR)</span>
+        </div>
+        <p class="leading-relaxed">
+          Use <strong>FLUX.1 Schnell</strong> if you need rapid iteration (<strong>4 steps</strong>, ~2-4 seconds per render) and commercial licensing (Apache 2.0). Use <strong>FLUX.1 Dev</strong> for top-tier photorealism, skin micro-pores, and fine typography (<strong>20-28 steps</strong> with Guidance Scale 3.5). If your GPU has <strong>8GB VRAM</strong>, run <strong>GGUF Q4_K_S</strong> with <code>--lowvram</code>. If you have <strong>12GB VRAM</strong>, run <strong>NF4 checkpoint</strong> or <strong>GGUF Q8_0</strong>. If you have <strong>16GB+ VRAM</strong>, run <strong>FP8 Dev</strong> natively.
+        </p>
+      </div>
+
+      <p>
+        FLUX.1 by Black Forest Labs is the reigning king of open-source diffusion, but its <strong>12-Billion parameter multimodal transformer (MMDiT)</strong> combined with Google's <strong>T5-XXL (4.7B)</strong> text encoder creates immense VRAM pressure. An unquantized FP16 FLUX model requires over <strong>24GB of dedicated VRAM</strong> just to load into memory without crashing.
+      </p>
+      <p>
+        If you have encountered <code>torch.cuda.OutOfMemoryError: CUDA out of memory</code> when hitting "Queue Prompt", this technical guide provides the definitive quantization matrix and ComfyUI setup to run FLUX smoothly on consumer hardware.
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">1. Architectural Comparison: Schnell vs Dev</h2>
+      <p>
+        Before selecting quantization formats, understand the structural and mathematical differences between the two official FLUX variants:
+      </p>
+
+      <div class="overflow-x-auto my-4">
+        <table class="w-full text-xs text-left border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+          <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-slate-200 font-semibold uppercase tracking-wider">
+            <tr>
+              <th class="p-3 border-b border-slate-200 dark:border-slate-800">Feature</th>
+              <th class="p-3 border-b border-slate-200 dark:border-slate-800 text-sky-600 dark:text-sky-400">FLUX.1 Schnell</th>
+              <th class="p-3 border-b border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400">FLUX.1 Dev</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-mono">
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">Sampling Steps</td>
+              <td class="p-3">4 steps (Distilled)</td>
+              <td class="p-3">20 - 28 steps (Guidance-distilled)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">CFG / Guidance Scale</td>
+              <td class="p-3">CFG: 1.0 (Fixed, no guidance)</td>
+              <td class="p-3">CFG: 1.0, Guidance: 3.5 (Default)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">License</td>
+              <td class="p-3 text-emerald-600 dark:text-emerald-400 font-bold">Apache 2.0 (Commercial OK)</td>
+              <td class="p-3 text-amber-600 dark:text-amber-400 font-bold">Non-Commercial Open Weights</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">Photorealism Quality</td>
+              <td class="p-3">High (Slightly softer micro-details)</td>
+              <td class="p-3 text-indigo-600 dark:text-indigo-400 font-bold">State-of-the-art (Pores, iris, text)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">Recommended Sampler</td>
+              <td class="p-3">euler + simple / sgm_uniform</td>
+              <td class="p-3">euler + simple / beta</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/30 text-xs text-amber-900 dark:text-amber-300">
+        <strong>Critical Schnell Rule:</strong> Never increase Schnell's sampling steps beyond 4. Because Schnell is a distillation model, running 20 steps does NOT improve quality—it creates over-sharpened, burned artifacts and wastes compute. For 20+ steps, switch to Dev.
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">2. The Quantization Matrix: GGUF vs NF4 vs FP8</h2>
+      <p>
+        To run FLUX without spending $2,000 on an RTX 4090, the open-source community created three primary compression pathways:
+      </p>
+
+      <div class="space-y-4">
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">A. GGUF (via ComfyUI-GGUF node)</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300">Best for 8GB & 12GB GPUs</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+            Originally created for llama.cpp, GGUF quantizes weights block-by-block. ComfyUI natively offloads individual layers between system RAM and GPU VRAM with zero crashes.
+          </p>
+          <ul class="text-xs space-y-1 text-slate-500 dark:text-slate-400 font-mono">
+            <li>• <strong>Q4_K_S (6.4 GB):</strong> Fits 8GB VRAM cards effortlessly. Tiny loss in specular reflections, indistinguishable to casual viewers.</li>
+            <li>• <strong>Q8_0 (12.2 GB):</strong> Virtually lossless. Perfect for 12GB cards (RTX 3060 12GB / RTX 4070).</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">B. NF4 (BitsAndBytes NormalFloat4)</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Fastest 12GB Checkpoint</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+            NF4 uses information-theoretically optimal quantile quantization for normally distributed neural weights. The entire checkpoint (UNet + CLIP + T5) is packed into a single <code>flux1-dev-bnb-nf4.safetensors</code> file (~11.9 GB).
+          </p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            <strong>Pros:</strong> Plugs directly into standard <code>CheckpointLoaderSimple</code> with no complex node splitting. Generates ~25% faster than GGUF on CUDA cores.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">C. FP8 (e4m3fn)</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">Standard for 16GB - 24GB GPUs</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+            The official Black Forest Labs 8-bit floating point format. Weight footprint is ~17.2 GB. Requires 16GB VRAM minimum or 24GB for peak performance without CPU paging.
+          </p>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">3. Consumer Hardware VRAM Playbook</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+        <!-- 8GB Tier -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="font-bold text-xs text-rose-600 dark:text-rose-400 uppercase tracking-wider">Tier 1: 8GB VRAM (RTX 3070 / 4060)</div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            <strong>Model:</strong> FLUX Schnell or Dev in <code>GGUF Q4_K_S</code>.<br>
+            <strong>CLIP:</strong> <code>t5xxl_fp8_e4m3fn.safetensors</code> or <code>t5_q4.gguf</code> + <code>clip_l.safetensors</code>.<br>
+            <strong>ComfyUI Startup Flag:</strong> <code>--lowvram</code>.<br>
+            <strong>Expected Render Time:</strong> ~12s (Schnell 4-step) / ~55s (Dev 20-step).
+          </p>
+        </div>
+
+        <!-- 12GB Tier -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="font-bold text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider">Tier 2: 12GB VRAM (RTX 3060 12G / 4070)</div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            <strong>Model:</strong> <code>flux1-dev-bnb-nf4.safetensors</code> or <code>GGUF Q8_0</code>.<br>
+            <strong>CLIP:</strong> DualCLIPLoader with FP8 T5.<br>
+            <strong>ComfyUI Startup Flag:</strong> Default (Auto-detect).<br>
+            <strong>Expected Render Time:</strong> ~6s (Schnell) / ~26s (Dev 20-step).
+          </p>
+        </div>
+      </div>
+
+      <!-- Cloud GPU Callout -->
+      <div class="p-4 rounded-xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border border-sky-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs text-slate-700 dark:text-slate-300">
+          <strong class="text-slate-900 dark:text-white">Tired of local 60-second renders and heating up your room?</strong>
+          <p class="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">Deploy an on-demand cloud RTX 4090 (24GB) or A40 (48GB) for ~$0.34/hr with pre-installed ComfyUI and FLUX FP8.</p>
+        </div>
+        <a href="https://runpod.io?ref=pacebowl" target="_blank" rel="noopener nofollow sponsored" data-umami-event="blog-flux-vram-runpod-click" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition whitespace-nowrap shadow-md shadow-sky-500/20">
+          Claim $5 Free Credits on RunPod →
+        </a>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">4. Step-by-Step ComfyUI Node Setup to Avoid OOM</h2>
+      <p>
+        If you want zero memory crashes when generating 1024x1024 latents, build your ComfyUI canvas using modular nodes rather than one massive monolithic loader:
+      </p>
+
+      <ol class="list-decimal pl-5 space-y-3 text-slate-600 dark:text-slate-400 text-xs">
+        <li>
+          <strong>Unet Loader (GGUF or NF4):</strong> Connect <code>UnetLoaderGGUF</code> loading your <code>flux1-dev-Q4_K_S.gguf</code> to the <code>model</code> input of <code>KSampler</code>.
+        </li>
+        <li>
+          <strong>DualCLIPLoader:</strong> Set <code>clip_name1</code> to <code>t5xxl_fp8_e4m3fn.safetensors</code> and <code>clip_name2</code> to <code>clip_l.safetensors</code>, with <code>type</code> set to <code>flux</code>.
+        </li>
+        <li>
+          <strong>EmptySD3LatentImage / EmptyLatentImage:</strong> Ensure your latent dimensions strictly match standard 1MP aspect buckets (e.g. 1024x1024, 896x1152, 1216x832). Generate these instantly with the <a href="/" class="text-sky-600 dark:text-sky-400 underline font-semibold">PaceBowl Latent Studio</a>.
+        </li>
+        <li>
+          <strong>VAEDecodeTiled (The Secret OOM Killer):</strong> The standard <code>VAEDecode</code> attempts to reconstruct the full 1024x1024 image in a single pass, which requires up to 3GB of burst VRAM. If your VRAM is 95% full after sampling, it instantly crashes with an OOM. Replacing it with <code>VAEDecodeTiled</code> processes the image in 512x512 tiles, cutting peak VRAM by 80%.
+        </li>
+      </ol>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">Frequently Asked Questions</h2>
+      <div class="space-y-4 pt-2">
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Q: Does FLUX.1 need a negative prompt?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            No! FLUX is trained on rectified flow matching and functions with CFG 1.0. Negative conditioning nodes should be left unplugged. Plugging in negative prompts often washes out dynamic contrast and doubles sampling computation unnecessarily.
+          </p>
+        </div>
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Q: Why does my PC freeze for 30 seconds before generation begins?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            This occurs during the text encoding phase when the massive 4.7B T5-XXL model is read into RAM. To accelerate this, make sure your ComfyUI models directory resides on a fast NVMe SSD rather than a spinning mechanical hard drive.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Studio CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Assemble FLUX Prompts & Calculate Safe Latents</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">Zero GPU overhead. Build camera, lighting, and style prompts on your second monitor while ComfyUI renders.</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
+        Launch PaceBowl ComfyUI Studio →
+      </a>
+    </div>
+  </article>
+
+  <!-- ========================================== -->
+  <!-- CHINESE VERSION -->
+  <!-- ========================================== -->
+  <article id="article-zh" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">首页</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">博客</a>
+      <span>/</span>
+      <span class="text-sky-600 dark:text-sky-400">FLUX Schnell 与 Dev 显存优化指南</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+        FLUX.1 Schnell vs Dev：ComfyUI 显存优化与量化选型终极实战指南
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+        <span>PaceBowl 研发团队</span>
+        <span>•</span>
+        <span>2026年10月更新</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 font-mono">8 分钟阅读</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-sky-900 dark:text-sky-200">想要精准计算 1MP 潜空间分辨率并一键导出工作流？</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">秒级复制 EmptyLatent 节点，下载开箱即用的 ComfyUI 画布 JSON。</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold whitespace-nowrap ml-4 transition">打开提示词工作台 →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+      <!-- Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-sky-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ 核心结论（TL;DR）</span>
+        </div>
+        <p class="leading-relaxed">
+          追求秒级生图与商用授权（Apache 2.0），选 <strong>FLUX.1 Schnell</strong>（<strong>4 步采样</strong>，单图约 2-4 秒）；追求顶级照片级皮肤毛孔、精准文字排版与高阶光影，选 <strong>FLUX.1 Dev</strong>（<strong>20-28 步采样</strong>，Guidance Scale 3.5）。显存 <strong>8GB</strong> 推荐使用 <strong>GGUF Q4_K_S</strong> 并附加 <code>--lowvram</code> 参数；显存 <strong>12GB</strong>（如 RTX 3060 12G / 4070）首选 <strong>NF4 单文件模型</strong> 或 <strong>GGUF Q8_0</strong>；显存 <strong>16GB 以上</strong> 可直接原生跑 <strong>FP8 Dev</strong>。
+        </p>
+      </div>
+
+      <p>
+        Black Forest Labs 推出的 <strong>FLUX.1</strong> 凭借 <strong>120 亿参数的多模态 Transformer 架构（MMDiT）</strong> 以及谷歌 <strong>T5-XXL（47 亿参数）</strong> 文本编码器，带来了颠覆性的生图品质。但这也带来了巨大的显存挑战：未量化的 FP16 完整模型加载需要超过 <strong>24GB 显存</strong>，在消费级显卡上一旦点击 Queue Prompt 极易引发 <code>CUDA out of memory</code> 崩溃。
+      </p>
+      <p>
+        本文为你拆解 Schnell 与 Dev 的架构本质、四大主流显存量化方案对比，以及消费级显卡彻底杜绝 OOM 的节点搭建方案。
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">一、架构与参数对比：Schnell 与 Dev 的本质差异</h2>
+      <p>
+        在挑选量化模型之前，必须先理清两者的核心参数与适用场景：
+      </p>
+
+      <div class="overflow-x-auto my-4">
+        <table class="w-full text-xs text-left border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+          <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-slate-200 font-semibold uppercase tracking-wider">
+            <tr>
+              <th class="p-3 border-b border-slate-200 dark:border-slate-800">特性维度</th>
+              <th class="p-3 border-b border-slate-200 dark:border-slate-800 text-sky-600 dark:text-sky-400">FLUX.1 Schnell</th>
+              <th class="p-3 border-b border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400">FLUX.1 Dev</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-mono">
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">推荐步数 (Steps)</td>
+              <td class="p-3">4 步（蒸馏模型）</td>
+              <td class="p-3">20 - 28 步（引导蒸馏）</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">引导参数 (CFG / Guidance)</td>
+              <td class="p-3">CFG: 1.0（固定，无 Guidance）</td>
+              <td class="p-3">CFG: 1.0, Guidance: 3.5（默认）</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">开源许可证</td>
+              <td class="p-3 text-emerald-600 dark:text-emerald-400 font-bold">Apache 2.0（支持商用）</td>
+              <td class="p-3 text-amber-600 dark:text-amber-400 font-bold">Non-Commercial（非商用开源）</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">画质与微观质感</td>
+              <td class="p-3">优秀（微距毛孔与虹膜略平滑）</td>
+              <td class="p-3 text-indigo-600 dark:text-indigo-400 font-bold">行业巅峰（真实皮质、文字印刷排版）</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-slate-900 dark:text-white font-sans">采样器与调度器</td>
+              <td class="p-3">euler + simple / sgm_uniform</td>
+              <td class="p-3">euler + simple / beta</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/30 text-xs text-amber-900 dark:text-amber-300">
+        <strong>避坑提示：</strong> Schnell 步数切勿超过 4 步！Schnell 作为强力蒸馏模型，调到 20 步不仅无法提升画质，反而会导致画面过度锐化曝光糊掉，并白白浪费算力。需要精细调节请直接使用 Dev。
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">二、四大量化模型矩阵：GGUF、NF4 与 FP8</h2>
+      <p>
+        为了让 8GB、12GB 显卡流畅生图，社区推出了以下核心压缩技术方案：
+      </p>
+
+      <div class="space-y-4">
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">1. GGUF（基于 ComfyUI-GGUF 节点）</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300">8GB 与 12GB 显卡救星</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+            源自 llama.cpp 的逐块量化技术。ComfyUI 可在系统内存与显存之间自动流式卸载单层权重，几乎彻底杜绝显存爆炸。
+          </p>
+          <ul class="text-xs space-y-1 text-slate-500 dark:text-slate-400 font-mono">
+            <li>• <strong>Q4_K_S（约 6.4 GB）：</strong> 8GB 显存完美适配，肉眼几乎无法分辨画质折损。</li>
+            <li>• <strong>Q8_0（约 12.2 GB）：</strong> 近乎无损精度，12GB 显卡（如 RTX 3060 12G、4070）首选。</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">2. NF4（BitsAndBytes 正态浮点 4 位）</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">最便捷的 12GB 单文件模型</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+            将 UNet、CLIP 与 T5 全部集成封装在单文件 <code>flux1-dev-bnb-nf4.safetensors</code>（约 11.9 GB）中。
+          </p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            <strong>核心优势：</strong> 直接使用自带的 <code>CheckpointLoaderSimple</code> 加载，无需配置复杂的双 CLIP 节点；CUDA 计算速度比 GGUF 快约 25%。
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">3. FP8（e4m3fn 官方标准）</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">16GB - 24GB 顶级显卡标配</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+            官方提供的 8 位浮点标准权重，体积约 17.2 GB。适合 RTX 4080、RTX 3090、RTX 4090 或云端高性能算力。
+          </p>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">三、消费级显卡配置选型建议</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+        <!-- 8GB -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="font-bold text-xs text-rose-600 dark:text-rose-400 uppercase tracking-wider">第 1 梯队：8GB 显存 (RTX 3070 / 4060)</div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            <strong>推荐模型：</strong> FLUX Schnell 或 Dev <code>GGUF Q4_K_S</code>。<br>
+            <strong>文本编码器：</strong> <code>t5xxl_fp8_e4m3fn.safetensors</code> + <code>clip_l.safetensors</code>。<br>
+            <strong>启动参数：</strong> 必加 <code>--lowvram</code>。<br>
+            <strong>预估生图耗时：</strong> Schnell 4 步约 12 秒 / Dev 20 步约 55 秒。
+          </p>
+        </div>
+
+        <!-- 12GB -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="font-bold text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider">第 2 梯队：12GB 显存 (RTX 3060 12G / 4070)</div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            <strong>推荐模型：</strong> <code>flux1-dev-bnb-nf4.safetensors</code> 或 <code>GGUF Q8_0</code>。<br>
+            <strong>文本编码器：</strong> DualCLIPLoader + FP8 T5。<br>
+            <strong>启动参数：</strong> 默认自动侦测即可。<br>
+            <strong>预估生图耗时：</strong> Schnell 4 步约 6 秒 / Dev 20 步约 26 秒。
+          </p>
+        </div>
+      </div>
+
+      <!-- Cloud GPU Callout -->
+      <div class="p-4 rounded-xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border border-sky-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs text-slate-700 dark:text-slate-300">
+          <strong class="text-slate-900 dark:text-white">受够了本地显卡风扇狂转与 60 秒漫长等待？</strong>
+          <p class="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">一键启动 RunPod 云端 RTX 4090（24G）或 A40（48G），每小时仅约 $0.34，自带预装 ComfyUI 与 FLUX 官方环境。</p>
+        </div>
+        <a href="https://runpod.io?ref=pacebowl" target="_blank" rel="noopener nofollow sponsored" data-umami-event="blog-flux-vram-runpod-click-zh" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition whitespace-nowrap shadow-md shadow-sky-500/20">
+          领取 RunPod 5 美元新手算力 →
+        </a>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">四、彻底根治 ComfyUI OOM 报错的 4 个关键设置</h2>
+      <p>
+        在搭建工作流时，遵循以下工程规范可彻底消除显存溢出：
+      </p>
+
+      <ol class="list-decimal pl-5 space-y-3 text-slate-600 dark:text-slate-400 text-xs">
+        <li>
+          <strong>使用分立式节点（UNetLoader + DualCLIPLoader + VAELoader）：</strong> 相比于打包的单个 CheckpointLoader，分立节点允许 ComfyUI 将 T5 编码器在生成前载入并在采样时完全卸载，释放高达 5GB 显存。
+        </li>
+        <li>
+          <strong>杜绝非法分辨率：</strong> 务必使用严格对齐 100 万像素的宽高比例桶（如 1024x1024、896x1152、1216x832）。可使用 <a href="/" class="text-sky-600 dark:text-sky-400 underline font-semibold">PaceBowl 工作台</a> 实时自动计算。
+        </li>
+        <li>
+          <strong>使用 VAEDecodeTiled 瓦片解码：</strong> 原生 <code>VAEDecode</code> 在还原大图瞬间需要高达 3GB 瞬时显存峰值，往往在 100% 采样后报错崩溃。替换为 <code>VAEDecodeTiled</code> 采用分块解码，可立减 80% 峰值显存占用。
+        </li>
+        <li>
+          <strong>切勿接入负面提示词：</strong> FLUX 流匹配机制无需负面提示词。接入空的或臃肿的负面节点不仅破坏画质，还会额外消耗一倍的推理显存。
+        </li>
+      </ol>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">常见问题解答 (FAQ)</h2>
+      <div class="space-y-4 pt-2">
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">问：为什么每次生图前电脑会卡顿约 30 秒？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            这是因为 4.7B 的 T5 文本模型正在从磁盘载入内存。请务必将 ComfyUI 的 models 文件夹部署在高速 NVMe 固态硬盘上，避免使用机械硬盘。
+          </p>
+        </div>
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">问：如何保存完整的 ComfyUI FLUX 工作流？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            在 PaceBowl 提示词工作台中，配置完提示词与宽高后，点击右侧的“💾 导出 .json 工作流”，下载后直接拖拽进 ComfyUI 画布即可直接开始生图。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Studio CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">秒级生成专业级 FLUX 提示词与潜空间分辨率</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">零显存开销。在副屏可视化勾选镜头光影与艺术风格，一键导出完整工作流 JSON。</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition">
+        进入 PaceBowl 提示词工作台 →
+      </a>
+    </div>
+  </article>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-[#07090e] py-8 text-center text-xs text-slate-500 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>PaceBowl &copy; 2026.</span>
+      <div class="flex items-center space-x-6 text-slate-600 dark:text-slate-400">
+        <a href="/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_studio">Studio</a>
+        <a href="/blog/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_blog">Blog</a>
+        <a href="https://buymeacoffee.com/pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="footer-sponsor-coffee" class="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-medium">☕ <span data-i18n="footer_coffee">Buy me a coffee</span></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Theme & Language Switcher Logic with Cross-Subdomain Cookie Sync -->
+  <script>
+    const I18N = {
+      en: {
+        back_blog: '← Back to Blog',
+        launch_btn: 'Launch Studio',
+        footer_studio: 'Studio',
+        footer_coffee: 'Buy me a coffee',
+        footer_blog: 'Blog'
+      },
+      zh: {
+        back_blog: '← 返回博客列表',
+        launch_btn: '进入工作台',
+        footer_studio: '工作台',
+        footer_blog: '精选博客',
+        footer_coffee: '赞助一杯咖啡'
+      }
+    };
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function setSharedState(name, value) {
+      try {
+        localStorage.setItem(name, value);
+      } catch (e) {}
+
+      const hostParts = window.location.hostname.split('.');
+      let rootDomain = '';
+      if (hostParts.length >= 2) {
+        rootDomain = '.' + hostParts.slice(-2).join('.');
+      }
+      const cookieDomain = rootDomain ? '; domain=' + rootDomain : '';
+      document.cookie = name + '=' + encodeURIComponent(value) + '; path=/' + cookieDomain + '; max-age=31536000; SameSite=Lax';
+    }
+
+    function getSharedTheme() {
+      const cookie = getCookie('pacebowl-theme');
+      if (cookie === 'light' || cookie === 'dark') return cookie;
+      const ls = localStorage.getItem('pacebowl-theme');
+      if (ls === 'light' || ls === 'dark') return ls;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function getSharedLang() {
+      const cookie = getCookie('pacebowl-lang');
+      if (cookie === 'zh' || cookie === 'en') return cookie;
+      const ls = localStorage.getItem('pacebowl-lang');
+      if (ls === 'zh' || ls === 'en') return ls;
+      return (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+    }
+
+    let currentLang = getSharedLang();
+
+    function updateThemeUI(isDark) {
+      const sun = document.getElementById('theme-sun-icon');
+      const moon = document.getElementById('theme-moon-icon');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+        } else {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+        }
+      }
+    }
+
+    function applyTheme(isDark, persist) {
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        if (persist) setSharedState('pacebowl-theme', 'dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        if (persist) setSharedState('pacebowl-theme', 'light');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark, true);
+    }
+
+    function updateLanguageUI() {
+      const label = document.getElementById('lang-label');
+      if (label) {
+        label.textContent = currentLang === 'zh' ? 'EN' : '中文';
+      }
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+      const artEn = document.getElementById('article-en');
+      const artZh = document.getElementById('article-zh');
+      if (currentLang === 'zh') {
+        artEn.classList.add('hidden');
+        artZh.classList.remove('hidden');
+      } else {
+        artZh.classList.add('hidden');
+        artEn.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+          el.innerHTML = I18N[currentLang][key];
+        }
+      });
+    }
+
+    function applyLanguage(lang, persist) {
+      currentLang = lang;
+      if (persist) setSharedState('pacebowl-lang', lang);
+      updateLanguageUI();
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage(nextLang, true);
+    }
+
+    function checkCrossDomainSync() {
+      const desiredTheme = getSharedTheme();
+      const isDarkCurrent = document.documentElement.classList.contains('dark');
+      if ((desiredTheme === 'dark') !== isDarkCurrent) {
+        applyTheme(desiredTheme === 'dark', false);
+      }
+      const desiredLang = getSharedLang();
+      if (desiredLang !== currentLang) {
+        applyLanguage(desiredLang, false);
+      }
+    }
+
+    window.addEventListener('pageshow', checkCrossDomainSync);
+    window.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkCrossDomainSync();
+    });
+    window.addEventListener('storage', checkCrossDomainSync);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const theme = getSharedTheme();
+      applyTheme(theme === 'dark', false);
+      applyLanguage(getSharedLang(), false);
+    });
+  </script>
+</body>
+</html>

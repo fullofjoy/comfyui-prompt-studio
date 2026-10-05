@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Best ComfyUI Negative Prompts for SDXL & Photorealism (2026 Runbook)</title>
+  <meta name="description" content="Eliminate mutated hands, plastic doll skin, and CGI sheen in ComfyUI. Copy-paste modular SDXL negative prompt blocks, learn why FLUX ignores negatives, and avoid CLIP attention degradation.">
+  <meta name="keywords" content="best negative prompt comfyui, sdxl negative prompt photorealism, fix bad hands comfyui, negative prompt clip text encode, comfyui negative embeddings">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://comfy.pacebowl.com/blog/comfyui-best-negative-prompts-sdxl-guide.html">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Umami Analytics -->
+  <script defer src="https://umami-ruby-alpha-96.vercel.app/script.js" data-website-id="f19f74d0-d931-45d2-9e84-64626b9e7409"></script>
+
+  <!-- Theme & Language Initialization: Anti-FOUC & Cross-Subdomain Sync -->
+  <script>
+    (function() {
+      function getSharedCookie(name) {
+        var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      var theme = getSharedCookie('pacebowl-theme') || localStorage.getItem('pacebowl-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://comfy.pacebowl.com/blog/comfyui-best-negative-prompts-sdxl-guide.html">
+  <meta property="og:title" content="The Best ComfyUI Negative Prompts for SDXL & Photorealism (2026 Runbook)">
+  <meta property="og:description" content="Copy-paste modular negative prompt blocks to fix distorted anatomy, plastic textures, and washed out colors in ComfyUI SDXL.">
+  <meta property="og:image" content="https://comfy.pacebowl.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://comfy.pacebowl.com/blog/comfyui-best-negative-prompts-sdxl-guide.html">
+  <meta name="twitter:title" content="The Best ComfyUI Negative Prompts for SDXL & Photorealism (2026 Runbook)">
+  <meta name="twitter:description" content="Copy-paste modular negative prompt blocks to fix distorted anatomy, plastic textures, and washed out colors in ComfyUI SDXL.">
+  <meta name="twitter:image" content="https://comfy.pacebowl.com/og-image.png">
+
+  <!-- Structured Data: TechArticle, FAQPage & Breadcrumbs -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "The Best ComfyUI Negative Prompts for SDXL & Photorealism (2026 Runbook)",
+        "description": "In-depth guide to engineering effective negative prompts for Stable Diffusion XL in ComfyUI. Includes modular blocks for human anatomy, anti-CGI texture control, and architectural explanations of CFG.",
+        "inLanguage": "en",
+        "author": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        },
+        "datePublished": "2026-10-06",
+        "dateModified": "2026-10-06",
+        "publisher": {
+          "@type": "Organization",
+          "name": "PaceBowl Studio"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why does SDXL need negative prompts, while FLUX does not?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "SDXL relies on Classifier-Free Guidance (CFG scale 5.0 to 7.0), which calculates image trajectories by subtracting the negative prompt vector from the positive vector. Without a negative prompt, SDXL latents drift into average, blurry artifacts. FLUX uses flow matching with guidance distillation (CFG 1.0) and has no negative conditioning path in its training objective."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the best universal negative prompt for SDXL?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The optimal 25-word universal negative prompt is: 'ugly, deformed iris, mutated hands, poorly drawn fingers, extra limbs, unnatural skin texture, airbrushed, plastic, CGI 3d render, overexposed, low quality, jpeg artifacts, watermark, signature'."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why does dumping 100 negative tokens make SDXL images look worse?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "OpenAI's CLIP text encoders allocate limited attention bandwidth across 77 token chunks. When you paste 100+ generic negative tags, attention weights become diluted, colors get desaturated, dynamic contrast drops, and the model paradoxically begins generating the very artifacts you tried to suppress."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can you use SD 1.5 Textual Inversion negative embeddings in SDXL?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. SD 1.5 uses a single 768-dimension CLIP encoder, while SDXL uses dual encoders (OpenCLIP ViT-bigG with 1280 dimensions and CLIP ViT-L with 768 dimensions). Loading SD 1.5 embeddings like EasyNegative in SDXL will trigger dimension mismatch errors in ComfyUI."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://comfy.pacebowl.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "https://comfy.pacebowl.com/blog/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Best SDXL Negative Prompts Guide",
+            "item": "https://comfy.pacebowl.com/blog/comfyui-best-negative-prompts-sdxl-guide.html"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0284c7', 600: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    html.dark ::-webkit-scrollbar-track { background: #0f172a; }
+    html.dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    html.light ::-webkit-scrollbar-track { background: #f8fafc; }
+    html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#07090e] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-rose-500 selection:text-white transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#07090e]/80 backdrop-blur sticky top-0 z-50 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white shadow-md shadow-sky-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+        </div>
+        <span class="font-bold text-base text-slate-900 dark:text-white tracking-tight">PaceBowl <span class="text-rose-600 dark:text-rose-400 font-mono text-xs px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950/80 border border-rose-300 dark:border-rose-500/30">ComfyUI</span></span>
+      </a>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <!-- Language Switcher Button -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-rose-400 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle English / 简体中文">
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="lang-label" class="font-semibold font-mono text-[11px]">中文</span>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-rose-400 text-slate-700 dark:text-slate-300 transition shadow-sm" title="Toggle Light / Dark mode">
+          <svg id="theme-sun-icon" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <a href="/blog/" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="back_blog">← Back to Blog</a>
+        <a href="/" class="px-3 py-1.5 rounded-md font-semibold bg-rose-500 hover:bg-rose-400 text-white transition" data-i18n="launch_btn">Launch Studio</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- ENGLISH VERSION -->
+  <!-- ========================================== -->
+  <article id="article-en" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">Home</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">Blog</a>
+      <span>/</span>
+      <span class="text-rose-600 dark:text-rose-400">SDXL Negative Prompt Guide</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+        The Best ComfyUI Negative Prompts for SDXL & Photorealism (2026 Runbook)
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+        <span>By PaceBowl Research Team</span>
+        <span>•</span>
+        <span>Updated October 2026</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 font-mono">6 min read</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-rose-900 dark:text-rose-200">Switching between SDXL and FLUX in ComfyUI?</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">Toggle model engines in 1 click to auto-hide or expose negative prompt boxes and download verified JSON workflows.</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-rose-500 hover:bg-rose-400 text-white font-semibold whitespace-nowrap ml-4 transition">Open Studio →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+      <!-- Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-rose-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ Direct Answer (TL;DR)</span>
+        </div>
+        <p class="leading-relaxed">
+          <strong>Less is more in SDXL negative prompts.</strong> Pasting 200-word negative dumps ruins CLIP attention and drains color vibrancy. The gold-standard universal negative prompt for SDXL is:
+          <code class="block mt-2 p-2 rounded bg-slate-200 dark:bg-slate-950 text-rose-600 dark:text-rose-400 font-mono">ugly, deformed iris, mutated hands, poorly drawn fingers, extra limbs, unnatural skin texture, airbrushed, plastic, CGI 3d render, overexposed, low quality, jpeg artifacts, watermark, signature</code>
+          If you are using <strong>FLUX.1</strong>, do NOT use negative prompts—leave the Negative conditioning unplugged.
+        </p>
+      </div>
+
+      <p>
+        In Stable Diffusion XL (SDXL), the <strong>Negative Conditioning</strong> input of your <code>KSampler</code> is as important as the positive prompt. While positive prompts define what the model must synthesize, the negative prompt acts as a repulsive vector in latent space, actively steering the mathematical diffusion steps away from deformed anatomy, digital plastic sheen, and undesirable artifacts.
+      </p>
+      <p>
+        However, the single biggest mistake creators make in ComfyUI is copying legacy SD 1.5 negative prompt encyclopedias. Here is the mathematical truth behind negative conditioning in SDXL, along with modular, copy-paste ready blocks that actually work.
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">1. Why SDXL Requires Negatives (And FLUX Ignores Them)</h2>
+      <p>
+        In SDXL, image generation is guided by <strong>Classifier-Free Guidance (CFG)</strong>:
+      </p>
+      <pre class="bg-slate-100 dark:bg-[#0b0f19] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-sky-600 dark:text-sky-300"><code>Prediction = Negative_Vector + CFG * (Positive_Vector - Negative_Vector)</code></pre>
+      <p>
+        At standard CFG values (such as <code>6.0</code> or <code>7.0</code>), the model subtracts whatever features match your negative conditioning. If your negative prompt is empty, SDXL uses an unconditional baseline, which often trends toward blurry, noisy median representations.
+      </p>
+      <p>
+        In contrast, <strong>FLUX.1</strong> was trained using <strong>rectified flow matching</strong> and <strong>guidance distillation</strong>. It evaluates generation trajectories along straight velocity vector fields without dual unconditional/conditional subtractions (hence CFG 1.0). Feeding negative conditioning into FLUX simply distorts flow velocity, causing desaturated colors and doubling your compute overhead.
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">2. The 4 Fatal Mistakes in SDXL Negative Prompts</h2>
+
+      <div class="space-y-3">
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">1. Negative Tag Bloat (> 77 Tokens):</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">CLIP text encoders divide prompts into 77-token chunks. Dumping 150 generic words causes the encoder to split attention into multiple chunks, dramatically weakening the repulsive force against critical flaws like bad hands.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">2. Semantic Contradictions:</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">Writing "dark moody cinematic lighting" in your positive prompt while including "darkness, shadows, black background" in your negative prompt creates a destructive vector cancellation, resulting in flat, muddy gray lighting.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">3. Wild Token Weights like (bad hands:1.8):</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">Weighting negative tags beyond <code>1.3</code> in SDXL frequently causes negative burn—manifesting as severed limbs, blackened fingers, or uncanny smooth blobs.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">4. Using SD 1.5 Embeddings:</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">SD 1.5 embeddings like <code>EasyNegative</code> or <code>bad-hands-5</code> are mathematically incompatible with SDXL's dual OpenCLIP text architecture and cause tensor dimension errors in ComfyUI.</p>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">3. Modular Copy-Paste Negative Blocks</h2>
+      <p>
+        Instead of one massive unmanageable paragraph, use these targeted, modular blocks depending on your generation goals:
+      </p>
+
+      <!-- Modular Block 1: Anatomy -->
+      <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Module A: Anatomy & Hands Distortion Fix</h3>
+          <button onclick="navigator.clipboard.writeText('mutated hands, poorly drawn hands, extra fingers, fused fingers, missing fingers, malformed limbs, disconnected limbs, unnatural joints, mutated spine, disfigured face, crossed eyes, distorted iris'); this.innerText='✓ Copied'; setTimeout(() => this.innerText='Copy Block', 2000)" class="px-2 py-1 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Copy Block</button>
+        </div>
+        <pre class="bg-slate-50 dark:bg-[#07090e] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-rose-600 dark:text-rose-400 select-all overflow-x-auto"><code>mutated hands, poorly drawn hands, extra fingers, fused fingers, missing fingers, malformed limbs, disconnected limbs, unnatural joints, mutated spine, disfigured face, crossed eyes, distorted iris</code></pre>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">Target: Prevents polydactyly (6 fingers), melted knuckles, disjointed elbows, and crooked pupils.</p>
+      </div>
+
+      <!-- Modular Block 2: Anti-CGI & Skin Realism -->
+      <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Module B: Anti-CGI & Photorealistic Skin Texture</h3>
+          <button onclick="navigator.clipboard.writeText('airbrushed skin, plastic skin, 3d render, octane render, unreal engine 5, digital painting, doll-like, waxy surface, oversaturated colors, cartoon illustration, anime, CGI sheen'); this.innerText='✓ Copied'; setTimeout(() => this.innerText='Copy Block', 2000)" class="px-2 py-1 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Copy Block</button>
+        </div>
+        <pre class="bg-slate-50 dark:bg-[#07090e] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-rose-600 dark:text-rose-400 select-all overflow-x-auto"><code>airbrushed skin, plastic skin, 3d render, octane render, unreal engine 5, digital painting, doll-like, waxy surface, oversaturated colors, cartoon illustration, anime, CGI sheen</code></pre>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">Target: Eliminates the dreaded "plastic Barbie" effect, forcing SDXL to render real microscopic skin pores and authentic analog film texture.</p>
+      </div>
+
+      <!-- Modular Block 3: Lighting & Quality -->
+      <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Module C: Overexposure & Digital Compression</h3>
+          <button onclick="navigator.clipboard.writeText('overexposed, blown out highlights, harsh flash, blur, low resolution, jpeg compression artifacts, watermark, logo, text, subtitles, signature, border, cropped'); this.innerText='✓ Copied'; setTimeout(() => this.innerText='Copy Block', 2000)" class="px-2 py-1 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Copy Block</button>
+        </div>
+        <pre class="bg-slate-50 dark:bg-[#07090e] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-rose-600 dark:text-rose-400 select-all overflow-x-auto"><code>overexposed, blown out highlights, harsh flash, blur, low resolution, jpeg compression artifacts, watermark, logo, text, subtitles, signature, border, cropped</code></pre>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">Target: Keeps dynamic range clean, prevents clip blowouts on forehead/shoulders, and strips stock photography watermarks.</p>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">4. ComfyUI Best Practices: Setting Up Negative Nodes</h2>
+      <p>
+        In ComfyUI, connect your negative prompt cleanly without overloading the canvas:
+      </p>
+
+      <ol class="list-decimal pl-5 space-y-2 text-slate-600 dark:text-slate-400 text-xs">
+        <li><strong>Color-Code Your Nodes:</strong> Set your Negative <code>CLIPTextEncode</code> node to a red/rose tint so you can distinguish it from Positive conditioning at a glance.</li>
+        <li><strong>Keep CFG Between 5.0 and 7.0:</strong> Pushing CFG above 8.5 with an aggressive negative prompt leads to high-frequency color burn and edge ringing.</li>
+        <li><strong>Use Aspect-Ratio Aligned Latents:</strong> Bad anatomy is frequently caused not by poor negative prompts, but by feeding arbitrary dimensions (e.g. 1920x1080) into SDXL. SDXL requires exact 1024x1024 or 1MP ratio buckets to keep human proportions intact.</li>
+      </ol>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">Frequently Asked Questions</h2>
+      <div class="space-y-4 pt-2">
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Q: Does leaving the negative prompt empty break SDXL?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            It will not crash the workflow, but the output will look significantly softer, flatter, and more prone to mutated fingers. SDXL checkpoints are heavily reliant on negative vectors to maintain structural sharpness.
+          </p>
+        </div>
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">Q: Can I use Textual Inversion embeddings like negativeXL in ComfyUI?</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Yes! Place the <code>.safetensors</code> embedding file into <code>ComfyUI/models/embeddings/</code> and type <code>embedding:negativeXL_A</code> directly into your Negative CLIP Text Encode node. This packs hundreds of tokens into a single vector slot.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Studio CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Automate Positive & Negative Prompts in ComfyUI</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">Toggle between FLUX and SDXL mode instantly. Copy verified negative prompts and calculate pixel-perfect latent buckets.</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white shadow-md shadow-rose-500/20 transition">
+        Launch PaceBowl ComfyUI Studio →
+      </a>
+    </div>
+  </article>
+
+  <!-- ========================================== -->
+  <!-- CHINESE VERSION -->
+  <!-- ========================================== -->
+  <article id="article-zh" class="max-w-3xl mx-auto px-4 py-12 flex-1 w-full hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6 font-mono">
+      <a href="/" class="hover:text-slate-700 dark:hover:text-slate-300">首页</a>
+      <span>/</span>
+      <a href="/blog/" class="hover:text-slate-700 dark:hover:text-slate-300">博客</a>
+      <span>/</span>
+      <span class="text-rose-600 dark:text-rose-400">SDXL 负面提示词终极指南</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+        ComfyUI SDXL 绝美写实质感负面提示词全解（2026 实战手册）
+      </h1>
+      <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+        <span>PaceBowl 研发团队</span>
+        <span>•</span>
+        <span>2026年10月更新</span>
+        <span>•</span>
+        <span class="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 font-mono">6 分钟阅读</span>
+      </div>
+    </header>
+
+    <!-- In-Article Banner CTA -->
+    <div class="my-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 flex items-center justify-between text-xs">
+      <div>
+        <span class="font-bold text-rose-900 dark:text-rose-200">在 SDXL 与 FLUX 之间频繁切换工作流？</span>
+        <div class="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">一键切换模型架构，自动折叠或唤醒负面提示词框，并支持一键下载完整 JSON 工作流。</div>
+      </div>
+      <a href="/" class="px-3.5 py-1.5 rounded bg-rose-500 hover:bg-rose-400 text-white font-semibold whitespace-nowrap ml-4 transition">打开提示词工作台 →</a>
+    </div>
+
+    <!-- Body -->
+    <div class="space-y-6 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+      <!-- Direct Answer Box -->
+      <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-rose-500/40 shadow-sm text-xs space-y-2">
+        <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold uppercase tracking-wider text-[11px]">
+          <span>⚡ 核心结论（TL;DR）</span>
+        </div>
+        <p class="leading-relaxed">
+          <strong>SDXL 负面提示词切忌长篇大论。</strong> 堆砌几百个无意义的垃圾词汇会稀释 CLIP 注意力并导致画面严重偏色发灰。SDXL 最优的 25 词黄金通用负面提示词为：
+          <code class="block mt-2 p-2 rounded bg-slate-200 dark:bg-slate-950 text-rose-600 dark:text-rose-400 font-mono">ugly, deformed iris, mutated hands, poorly drawn fingers, extra limbs, unnatural skin texture, airbrushed, plastic, CGI 3d render, overexposed, low quality, jpeg artifacts, watermark, signature</code>
+          提示：若切换为 <strong>FLUX.1</strong> 模型，<strong>请务必留空并拔掉 Negative 节点</strong>，FLUX 原生无负面提示词机制。
+        </p>
+      </div>
+
+      <p>
+        在 Stable Diffusion XL（SDXL）的 ComfyUI 画布中，连接到 <code>KSampler</code> 的 <strong>Negative Conditioning</strong> 节点至关重要。正面提示词决定了画面生成的目标特征，而负面提示词则在潜空间中提供排斥引导向量，将扩散步数强行推离畸形肢体、塑料蜡人感以及劣质数字水印。
+      </p>
+      <p>
+        然而，大量玩家仍然照搬 SD 1.5 时代的“负面大百科”。本文从分类器自由引导（CFG）底层数学逻辑出发，为你梳理模块化、高杀伤力的 SDXL 负面提示词工程。
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">一、为什么 SDXL 必需负面，而 FLUX 坚决不要？</h2>
+      <p>
+        SDXL 的扩散核心基于 <strong>分类器自由引导（CFG）</strong> 公式：
+      </p>
+      <pre class="bg-slate-100 dark:bg-[#0b0f19] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-sky-600 dark:text-sky-300"><code>输出潜变量 = 负面向量 + CFG * (正面向量 - 负面向量)</code></pre>
+      <p>
+        在标准的 CFG 权重（6.0 - 7.0）下，模型通过正面与负面的向量差进行外推。如果负面提示词留空，SDXL 会使用无条件的随机中值做差，画面往往会发虚、结构偏软。
+      </p>
+      <p>
+        而 <strong>FLUX.1</strong> 采用的是 <strong>流匹配（Flow Matching）</strong> 与引导蒸馏架构。其推理轨迹是沿着笔直的速度矢量场前行，没有双重条件差分计算（固定 CFG 1.0）。强行在 FLUX 中接入负面提示词，只会严重扰乱矢量场，导致色彩褪色并消耗双倍推理显存。
+      </p>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">二、SDXL 负面提示词的 4 大致命误区</h2>
+
+      <div class="space-y-3">
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">1. 词数严重超标（超过 77 个 Token）：</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">CLIP 文本编码器按 77 个 Token 分块。复制上百个词会导致注意力权重被过度摊薄，对“坏手、多肢”的排斥力急剧下降。</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">2. 正负语义自相矛盾：</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">如果在正面提示词中写了“电影感暗调逆光（cinematic moody dark lighting）”，却在负面里写了“darkness, shadows, black”，正负向量互相抵消，最终生成死板灰蒙蒙的废片。</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">3. 暴力堆叠过高权重（如 (bad hands:1.8)）：</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">在 SDXL 中，权重超过 1.3 会引发强烈的负面烧结（Negative Burn），手指反而可能被直接抹平变成肉块或黑色斑块。</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-500/30 text-xs">
+          <strong class="text-rose-900 dark:text-rose-300">4. 混用 SD 1.5 时代的 Embedding：</strong>
+          <p class="text-slate-600 dark:text-slate-400 mt-1">SD 1.5 使用单 768 维 CLIP，而 SDXL 是双编码器（1280 维 + 768 维）。直接在 SDXL 中调用 <code>EasyNegative</code> 等旧文件会直接报错张量维度不匹配。</p>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">三、三大按需即用的模块化负面提示词块</h2>
+      <p>
+        根据当前生成的题材，按需选复制对应的模块：
+      </p>
+
+      <!-- 模块 A：人体与坏手 -->
+      <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">模块 A：人体解剖学与手指畸形修正</h3>
+          <button onclick="navigator.clipboard.writeText('mutated hands, poorly drawn hands, extra fingers, fused fingers, missing fingers, malformed limbs, disconnected limbs, unnatural joints, mutated spine, disfigured face, crossed eyes, distorted iris'); this.innerText='✓ 已复制'; setTimeout(() => this.innerText='复制此模块', 2000)" class="px-2 py-1 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">复制此模块</button>
+        </div>
+        <pre class="bg-slate-50 dark:bg-[#07090e] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-rose-600 dark:text-rose-400 select-all overflow-x-auto"><code>mutated hands, poorly drawn hands, extra fingers, fused fingers, missing fingers, malformed limbs, disconnected limbs, unnatural joints, mutated spine, disfigured face, crossed eyes, distorted iris</code></pre>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">针对：六指多指、并指黏连、反关节畸形、眼球斜视对眼。</p>
+      </div>
+
+      <!-- 模块 B：去塑料蜡人与写实质感 -->
+      <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">模块 B：消除塑料感、3D 假人与过度磨皮</h3>
+          <button onclick="navigator.clipboard.writeText('airbrushed skin, plastic skin, 3d render, octane render, unreal engine 5, digital painting, doll-like, waxy surface, oversaturated colors, cartoon illustration, anime, CGI sheen'); this.innerText='✓ 已复制'; setTimeout(() => this.innerText='复制此模块', 2000)" class="px-2 py-1 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">复制此模块</button>
+        </div>
+        <pre class="bg-slate-50 dark:bg-[#07090e] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-rose-600 dark:text-rose-400 select-all overflow-x-auto"><code>airbrushed skin, plastic skin, 3d render, octane render, unreal engine 5, digital painting, doll-like, waxy surface, oversaturated colors, cartoon illustration, anime, CGI sheen</code></pre>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">针对：杜绝芭比娃娃般的过度磨皮感，强迫 SDXL 呈现微观皮肤毛孔与自然胶片颗粒。</p>
+      </div>
+
+      <!-- 模块 C：光影过曝与压缩噪点 -->
+      <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">模块 C：光影过曝、死黑与低清压缩伪影</h3>
+          <button onclick="navigator.clipboard.writeText('overexposed, blown out highlights, harsh flash, blur, low resolution, jpeg compression artifacts, watermark, logo, text, subtitles, signature, border, cropped'); this.innerText='✓ 已复制'; setTimeout(() => this.innerText='复制此模块', 2000)" class="px-2 py-1 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">复制此模块</button>
+        </div>
+        <pre class="bg-slate-50 dark:bg-[#07090e] p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-xs text-rose-600 dark:text-rose-400 select-all overflow-x-auto"><code>overexposed, blown out highlights, harsh flash, blur, low resolution, jpeg compression artifacts, watermark, logo, text, subtitles, signature, border, cropped</code></pre>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">针对：高光死白溢出、闪光灯油腻反光、图库水印与乱码签名。</p>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">四、ComfyUI 画布最佳实践</h2>
+      <ol class="list-decimal pl-5 space-y-2 text-slate-600 dark:text-slate-400 text-xs">
+        <li><strong>节点颜色标记：</strong> 右键 Negative 的 <code>CLIPTextEncode</code> 节点，设为红色或粉色背景，避免与正面混淆。</li>
+        <li><strong>CFG 严控在 5.0 - 7.0：</strong> 负面提示词较强时，过高的 CFG 会导致边缘产生黑边光晕与噪点溢出。</li>
+        <li><strong>配合 100 万像素比例桶：</strong> 身体比例失真大多不是负面词的问题，而是因为随意输入非训练比例（如直接拉到 1920x1080）。请使用 <a href="/" class="text-rose-600 dark:text-rose-400 underline font-semibold">PaceBowl 潜空间计算器</a> 选定标准比例。</li>
+      </ol>
+
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white pt-4">常见问题解答 (FAQ)</h2>
+      <div class="space-y-4 pt-2">
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">问：完全不写负面提示词会导致 SDXL 报错吗？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            不会报错，但生成的人物极易出现多指、脸部结构发软、对比度不足。SDXL 对负面引导具有强依赖性。
+          </p>
+        </div>
+        <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-bold text-slate-900 dark:text-white text-xs mb-1">问：如何一键生成带有负面词的完整 ComfyUI 工作流？</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            在 PaceBowl 工作台顶部切换为 SDXL 模式，配置好正面与负面提示词后，点击“💾 导出 .json 工作流”，下载后直接拖进 ComfyUI 即可。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Studio CTA -->
+    <div class="mt-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-500/30 text-center shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">秒级生成专业级 SDXL 正负提示词</h3>
+      <p class="text-slate-600 dark:text-slate-400 text-xs mb-4">随时切换 FLUX / SDXL 双引擎，副屏精准计算潜空间尺寸，一键导出完整连线工作流。</p>
+      <a href="/" class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white shadow-md shadow-rose-500/20 transition">
+        进入 PaceBowl 提示词工作台 →
+      </a>
+    </div>
+  </article>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-[#07090e] py-8 text-center text-xs text-slate-500 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span>PaceBowl &copy; 2026.</span>
+      <div class="flex items-center space-x-6 text-slate-600 dark:text-slate-400">
+        <a href="/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_studio">Studio</a>
+        <a href="/blog/" class="hover:text-slate-900 dark:hover:text-slate-200 transition" data-i18n="footer_blog">Blog</a>
+        <a href="https://buymeacoffee.com/pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="footer-sponsor-coffee" class="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-medium">☕ <span data-i18n="footer_coffee">Buy me a coffee</span></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Theme & Language Switcher Logic with Cross-Subdomain Cookie Sync -->
+  <script>
+    const I18N = {
+      en: {
+        back_blog: '← Back to Blog',
+        launch_btn: 'Launch Studio',
+        footer_studio: 'Studio',
+        footer_coffee: 'Buy me a coffee',
+        footer_blog: 'Blog'
+      },
+      zh: {
+        back_blog: '← 返回博客列表',
+        launch_btn: '进入工作台',
+        footer_studio: '工作台',
+        footer_blog: '精选博客',
+        footer_coffee: '赞助一杯咖啡'
+      }
+    };
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function setSharedState(name, value) {
+      try {
+        localStorage.setItem(name, value);
+      } catch (e) {}
+
+      const hostParts = window.location.hostname.split('.');
+      let rootDomain = '';
+      if (hostParts.length >= 2) {
+        rootDomain = '.' + hostParts.slice(-2).join('.');
+      }
+      const cookieDomain = rootDomain ? '; domain=' + rootDomain : '';
+      document.cookie = name + '=' + encodeURIComponent(value) + '; path=/' + cookieDomain + '; max-age=31536000; SameSite=Lax';
+    }
+
+    function getSharedTheme() {
+      const cookie = getCookie('pacebowl-theme');
+      if (cookie === 'light' || cookie === 'dark') return cookie;
+      const ls = localStorage.getItem('pacebowl-theme');
+      if (ls === 'light' || ls === 'dark') return ls;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function getSharedLang() {
+      const cookie = getCookie('pacebowl-lang');
+      if (cookie === 'zh' || cookie === 'en') return cookie;
+      const ls = localStorage.getItem('pacebowl-lang');
+      if (ls === 'zh' || ls === 'en') return ls;
+      return (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+    }
+
+    let currentLang = getSharedLang();
+
+    function updateThemeUI(isDark) {
+      const sun = document.getElementById('theme-sun-icon');
+      const moon = document.getElementById('theme-moon-icon');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+        } else {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+        }
+      }
+    }
+
+    function applyTheme(isDark, persist) {
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        if (persist) setSharedState('pacebowl-theme', 'dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        if (persist) setSharedState('pacebowl-theme', 'light');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark, true);
+    }
+
+    function updateLanguageUI() {
+      const label = document.getElementById('lang-label');
+      if (label) {
+        label.textContent = currentLang === 'zh' ? 'EN' : '中文';
+      }
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+      const artEn = document.getElementById('article-en');
+      const artZh = document.getElementById('article-zh');
+      if (currentLang === 'zh') {
+        artEn.classList.add('hidden');
+        artZh.classList.remove('hidden');
+      } else {
+        artZh.classList.add('hidden');
+        artEn.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+          el.innerHTML = I18N[currentLang][key];
+        }
+      });
+    }
+
+    function applyLanguage(lang, persist) {
+      currentLang = lang;
+      if (persist) setSharedState('pacebowl-lang', lang);
+      updateLanguageUI();
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage(nextLang, true);
+    }
+
+    function checkCrossDomainSync() {
+      const desiredTheme = getSharedTheme();
+      const isDarkCurrent = document.documentElement.classList.contains('dark');
+      if ((desiredTheme === 'dark') !== isDarkCurrent) {
+        applyTheme(desiredTheme === 'dark', false);
+      }
+      const desiredLang = getSharedLang();
+      if (desiredLang !== currentLang) {
+        applyLanguage(desiredLang, false);
+      }
+    }
+
+    window.addEventListener('pageshow', checkCrossDomainSync);
+    window.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkCrossDomainSync();
+    });
+    window.addEventListener('storage', checkCrossDomainSync);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const theme = getSharedTheme();
+      applyTheme(theme === 'dark', false);
+      applyLanguage(getSharedLang(), false);
+    });
+  </script>
+</body>
+</html>
