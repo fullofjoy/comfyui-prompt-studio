@@ -204,6 +204,12 @@
           <svg id="theme-moon-icon" class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
 
+        <!-- Credits & Daily Free Quota Badge -->
+        <button id="credits-badge-btn" onclick="PaceBowlCredits.openModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/70 border border-sky-300 dark:border-sky-500/40 hover:border-sky-500 text-xs text-sky-800 dark:text-sky-300 transition shadow-sm font-mono active:scale-95" title="Daily Free Quota & Credits Wallet">
+          <span id="credits-badge-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="credits-badge-label">⚡ 10 Free</span>
+        </button>
+
         <!-- PaceBowl Suite Matrix Switcher (Touch & Hover Friendly) -->
         <div class="relative" id="suite-dropdown-container">
           <button id="suite-dropdown-btn" onclick="toggleSuiteDropdown(event)" class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-sky-500/40 text-xs text-slate-700 dark:text-slate-300 transition shadow-sm active:scale-95">
@@ -524,6 +530,10 @@
               <button onclick="copyOutput('prompt-output')" class="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 <span data-i18n="btn_copy_prompt">Copy Text</span>
+              </button>
+              <button onclick="aiMagicPolish()" id="btn-ai-polish" class="px-2.5 py-1.5 rounded-md text-xs font-bold bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5" title="Deep AI Prompt Expansion & Cinematic Polish (Cost: 2 credits)">
+                <span>🪄</span>
+                <span data-i18n="btn_ai_polish">AI Polish (-2)</span>
               </button>
               <button onclick="copyClipNode()" id="clip-node-btn" class="px-3 py-1.5 rounded-md text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20 transition flex items-center gap-1.5" title="Copy serialized CLIP Text Encode node to clipboard. Switch to ComfyUI canvas and press Ctrl+V to paste!">
                 <span data-i18n="btn_copy_clip_node">⚡ Copy Node (Canvas Ctrl+V)</span>
@@ -917,6 +927,95 @@
     </div>
   </footer>
 
+  <!-- PaceBowl Credits & Daily Quota Center Modal -->
+  <div id="credits-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-800 dark:text-slate-100 p-6 space-y-4">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-sky-500/20">⚡</div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white" data-i18n="modal_credits_title">PaceBowl Credits & Free Quota</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400" data-i18n="modal_credits_sub">Cross-subdomain unified quota & perks wallet</p>
+          </div>
+        </div>
+        <button onclick="PaceBowlCredits.closeModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Quota & Balance Cards -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Daily Free Quota Card -->
+        <div class="p-3.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-500/30">
+          <div class="text-[11px] font-medium text-sky-800 dark:text-sky-300 uppercase tracking-wider mb-1" data-i18n="modal_card_daily_title">Daily Free Quota</div>
+          <div class="flex items-baseline gap-1">
+            <span id="modal-daily-remaining" class="text-2xl font-extrabold text-sky-600 dark:text-sky-400 font-mono">10</span>
+            <span class="text-xs text-slate-500 font-mono">/ 10</span>
+          </div>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1" data-i18n="modal_card_daily_tip">Auto-resets every day at 00:00</p>
+        </div>
+
+        <!-- Permanent Balance Card -->
+        <div class="p-3.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30">
+          <div class="text-[11px] font-medium text-purple-800 dark:text-purple-300 uppercase tracking-wider mb-1" data-i18n="modal_card_perm_title">Permanent Balance</div>
+          <div class="flex items-baseline gap-1">
+            <span id="modal-perm-balance" class="text-2xl font-extrabold text-purple-600 dark:text-purple-400 font-mono">0</span>
+            <span class="text-xs text-slate-500 font-mono">pts</span>
+          </div>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1" data-i18n="modal_card_perm_tip">Never expires, cross-site shared</p>
+        </div>
+      </div>
+
+      <!-- Usage Rate Rules -->
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+        <div class="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+          <span data-i18n="modal_rules_title">Consumption Rates</span>
+          <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono" data-i18n="modal_rules_badge">Priority: Daily Quota First</span>
+        </div>
+        <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600 dark:text-slate-400">
+          <div class="flex items-center justify-between py-0.5 border-b border-slate-200 dark:border-slate-800/80">
+            <span data-i18n="rule_text">Copy Prompt / Aspect</span>
+            <span class="text-emerald-500 font-bold font-mono">0 (Free)</span>
+          </div>
+          <div class="flex items-center justify-between py-0.5 border-b border-slate-200 dark:border-slate-800/80">
+            <span data-i18n="rule_node">⚡ Copy Canvas Node</span>
+            <span class="text-sky-500 font-bold font-mono">1 Quota</span>
+          </div>
+          <div class="flex items-center justify-between py-0.5">
+            <span data-i18n="rule_workflow">💾 Download JSON</span>
+            <span class="text-sky-500 font-bold font-mono">2 Quota</span>
+          </div>
+          <div class="flex items-center justify-between py-0.5">
+            <span data-i18n="rule_polish">🪄 AI Magic Polish</span>
+            <span class="text-sky-500 font-bold font-mono">2 Quota</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Redeem Code Section -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300" data-i18n="modal_redeem_label">Redeem Promo Code / Sponsor Key</label>
+        <div class="flex gap-2">
+          <input type="text" id="redeem-code-input" placeholder="e.g. PACEBOWL or COMFYUI" class="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500">
+          <button onclick="PaceBowlCredits.redeemCode()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 transition shadow-sm flex-shrink-0" data-i18n="modal_redeem_btn">Redeem</button>
+        </div>
+        <p class="text-[10px] text-slate-500" data-i18n="modal_redeem_hint">Try promo code <strong class="text-sky-500 cursor-pointer" onclick="document.getElementById('redeem-code-input').value='PACEBOWL'">PACEBOWL</strong> to claim 30 bonus points.</p>
+      </div>
+
+      <!-- Sponsor / Perks Callout -->
+      <div class="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-rose-500/10 border border-amber-300/40 dark:border-amber-500/30 flex items-center justify-between gap-3 text-xs">
+        <div class="text-[11px] text-slate-700 dark:text-slate-300 min-w-0">
+          <div class="font-bold text-slate-900 dark:text-white truncate" data-i18n="modal_sponsor_title">Support PaceBowl & Unlock 100 Credits</div>
+          <div class="text-slate-500 dark:text-slate-400 text-[10px] truncate" data-i18n="modal_sponsor_sub">Sponsor $3+ on Buy Me a Coffee to receive priority quota and VIP status.</div>
+        </div>
+        <a href="https://buymeacoffee.com/pacebowl" target="_blank" rel="noopener noreferrer" data-umami-event="credits-modal-sponsor" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition whitespace-nowrap shadow-sm shadow-amber-500/20 flex-shrink-0" data-i18n="modal_sponsor_btn">
+          ☕ Sponsor
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- Application Logic -->
   <script>
     // I18N Dictionary
@@ -1017,8 +1116,27 @@
         tex_lacquer: 'Antique Chipped Lacquer & Craquelure',
         clip_pos_title: 'CLIP Text Encode (Positive Prompt)',
         btn_copy_prompt: 'Copy Text',
+        btn_ai_polish: '🪄 AI Polish (-2)',
         btn_copy_clip_node: '⚡ Copy Node (Canvas Ctrl+V)',
         btn_download_workflow: '💾 Download .json Workflow',
+        modal_credits_title: 'PaceBowl Credits & Free Quota',
+        modal_credits_sub: 'Cross-subdomain unified quota & perks wallet',
+        modal_card_daily_title: 'Daily Free Quota',
+        modal_card_daily_tip: 'Auto-resets every day at 00:00',
+        modal_card_perm_title: 'Permanent Balance',
+        modal_card_perm_tip: 'Never expires, cross-site shared',
+        modal_rules_title: 'Consumption Rates',
+        modal_rules_badge: 'Priority: Daily Quota First',
+        rule_text: 'Copy Prompt / Aspect',
+        rule_node: '⚡ Copy Canvas Node',
+        rule_workflow: '💾 Download JSON',
+        rule_polish: '🪄 AI Magic Polish',
+        modal_redeem_label: 'Redeem Promo Code / Sponsor Key',
+        modal_redeem_btn: 'Redeem',
+        modal_redeem_hint: 'Try promo code <strong class="text-sky-500 cursor-pointer" onclick="document.getElementById(\'redeem-code-input\').value=\'PACEBOWL\'">PACEBOWL</strong> to claim 30 bonus points.',
+        modal_sponsor_title: 'Support PaceBowl & Unlock 100 Credits',
+        modal_sponsor_sub: 'Sponsor $3+ on Buy Me a Coffee to receive priority quota and VIP status.',
+        modal_sponsor_btn: '☕ Sponsor',
         clip_neg_title: 'CLIP Text Encode (Negative Prompt)',
         btn_copy_neg: 'Copy Negative',
         guidance_title: 'Flux.1 Prompting Best Practice (T5-XXL)',
@@ -1188,8 +1306,27 @@
         tex_lacquer: '斑驳古旧开片漆面与历史陈旧包浆',
         clip_pos_title: 'CLIP 文本编码器（正向提示词）',
         btn_copy_prompt: '复制文本',
+        btn_ai_polish: '🪄 AI 润色扩写 (-2)',
         btn_copy_clip_node: '⚡ 复制节点 (画布 Ctrl+V 粘贴)',
         btn_download_workflow: '💾 导出 .json 工作流',
+        modal_credits_title: 'PaceBowl 积分与每日额度中心',
+        modal_credits_sub: '全站通用跨子站免费额度与权益钱包',
+        modal_card_daily_title: '今日免费额度',
+        modal_card_daily_tip: '每日 00:00 自动刷新 10 次',
+        modal_card_perm_title: '永久积分账户',
+        modal_card_perm_tip: '永不过期，全站子站通用',
+        modal_rules_title: '功能消耗标准',
+        modal_rules_badge: '扣费规则：优先消耗今日免费额度',
+        rule_text: '复制基础提示词 / 宽高计算',
+        rule_node: '⚡ 复制画布节点',
+        rule_workflow: '💾 导出 JSON 工作流',
+        rule_polish: '🪄 AI 深度润色扩写',
+        modal_redeem_label: '兑换码 / 赞助激活码',
+        modal_redeem_btn: '立即兑换',
+        modal_redeem_hint: '输入首发福利码 <strong class="text-sky-500 cursor-pointer" onclick="document.getElementById(\'redeem-code-input\').value=\'PACEBOWL\'">PACEBOWL</strong> 即可免费领取 30 永久积分。',
+        modal_sponsor_title: '赞助支持 PaceBowl 并解锁 100 积分',
+        modal_sponsor_sub: '在 Buy Me a Coffee 赞助一杯咖啡，获得优先队列与永久尊享特权。',
+        modal_sponsor_btn: '☕ 赞助一杯咖啡',
         clip_neg_title: 'CLIP 文本编码器（负向提示词）',
         btn_copy_neg: '复制负向词',
         guidance_title: 'Flux.1 提示词黄金法则 (T5-XXL)',
@@ -1504,13 +1641,261 @@
       document.getElementById('token-counter').textContent = `~${words} words`;
     }
 
-    function showToast(msg) {
+    function showToast(msg, isWarning) {
       const t = document.getElementById('toast');
+      if (!t) return;
       t.textContent = msg || '✓ Copied to clipboard!';
+      if (isWarning || (typeof msg === 'string' && (msg.includes('⚠️') || msg.includes('❌')))) {
+        t.className = 'fixed bottom-6 right-6 z-50 transform transition-all duration-300 pointer-events-none bg-rose-600 text-white font-bold px-4 py-2.5 rounded-lg shadow-xl shadow-rose-600/30 text-xs flex items-center space-x-2';
+      } else {
+        t.className = 'fixed bottom-6 right-6 z-50 transform transition-all duration-300 pointer-events-none bg-sky-500 text-slate-950 font-bold px-4 py-2.5 rounded-lg shadow-xl shadow-sky-500/20 text-xs flex items-center space-x-2';
+      }
       t.classList.remove('translate-y-20', 'opacity-0');
       setTimeout(() => {
         t.classList.add('translate-y-20', 'opacity-0');
-      }, 2000);
+      }, 2600);
+    }
+
+    // PaceBowl Cross-Subdomain Unified Credits & Daily Free Quota Protocol
+    const PaceBowlCredits = {
+      COOKIE_KEY: 'pacebowl-credits',
+      STORAGE_KEY: 'pacebowl_credits_v1',
+      REDEEMED_KEY: 'pacebowl_redeemed_codes',
+      DAILY_TOTAL: 10,
+
+      PROMO_CODES: {
+        'PACEBOWL': 30,
+        'COMFYUI': 20,
+        'VIP2026': 50,
+        'FLUX2026': 25
+      },
+
+      getTodayString() {
+        return new Date().toISOString().slice(0, 10);
+      },
+
+      getState() {
+        let state = null;
+        try {
+          const stored = localStorage.getItem(this.STORAGE_KEY);
+          if (stored) state = JSON.parse(stored);
+        } catch (e) {}
+
+        const today = this.getTodayString();
+
+        if (!state || typeof state !== 'object') {
+          state = {
+            daily: { date: today, used: 0, total: this.DAILY_TOTAL },
+            balance: 0,
+            isPro: false
+          };
+        } else {
+          if (!state.daily || state.daily.date !== today) {
+            state.daily = { date: today, used: 0, total: this.DAILY_TOTAL };
+          }
+          if (typeof state.balance !== 'number') state.balance = 0;
+        }
+
+        return state;
+      },
+
+      saveState(state) {
+        try {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+
+        try {
+          const hostParts = window.location.hostname.split('.');
+          let rootDomain = '';
+          if (hostParts.length >= 2) {
+            rootDomain = '.' + hostParts.slice(-2).join('.');
+          }
+          const cookieDomain = rootDomain ? '; domain=' + rootDomain : '';
+          const payload = encodeURIComponent(JSON.stringify({
+            d: state.daily.date,
+            u: state.daily.used,
+            b: state.balance
+          }));
+          document.cookie = `${this.COOKIE_KEY}=${payload}${cookieDomain}; path=/; max-age=31536000; SameSite=Lax`;
+        } catch (e) {}
+
+        this.updateUI();
+      },
+
+      getAvailableQuota() {
+        const state = this.getState();
+        const remainingDaily = Math.max(0, state.daily.total - state.daily.used);
+        return {
+          dailyRemaining: remainingDaily,
+          dailyTotal: state.daily.total,
+          balance: state.balance,
+          totalAvailable: remainingDaily + state.balance
+        };
+      },
+
+      consume(cost, actionKey, actionLabel) {
+        const state = this.getState();
+        const remainingDaily = Math.max(0, state.daily.total - state.daily.used);
+
+        if (remainingDaily >= cost) {
+          state.daily.used += cost;
+          this.saveState(state);
+          const left = state.daily.total - state.daily.used;
+          showToast(currentLang === 'zh'
+            ? `⚡ 消耗 ${cost} 免费额度，今日剩余 ${left}/${state.daily.total}`
+            : `⚡ Used ${cost} daily quota, ${left}/${state.daily.total} remaining today`
+          );
+          trackAction('credits_consumed', { type: 'daily', cost, action: actionKey });
+          return true;
+        } else if (remainingDaily + state.balance >= cost) {
+          const fromDaily = remainingDaily;
+          const fromBalance = cost - fromDaily;
+          state.daily.used = state.daily.total;
+          state.balance -= fromBalance;
+          this.saveState(state);
+          showToast(currentLang === 'zh'
+            ? `💎 消耗 ${fromBalance} 永久积分，剩余 ${state.balance} 积分`
+            : `💎 Used ${fromBalance} permanent credits, ${state.balance} pts remaining`
+          );
+          trackAction('credits_consumed', { type: 'mixed', cost, fromDaily, fromBalance, action: actionKey });
+          return true;
+        } else {
+          const msg = currentLang === 'zh'
+            ? `⚠️ 今日免费额度已用完（0/10）！明日 00:00 自动重置，或在积分中心输入兑换码 / 赞助解锁。`
+            : `⚠️ Daily free quota exhausted (0/10)! Auto-resets tomorrow at 00:00, or enter a promo code / sponsor.`;
+          showToast(msg, true);
+          this.openModal();
+          trackAction('credits_exhausted', { cost, action: actionKey });
+          return false;
+        }
+      },
+
+      redeemCode() {
+        const input = document.getElementById('redeem-code-input');
+        if (!input) return;
+        const code = input.value.trim().toUpperCase();
+        if (!code) {
+          showToast(currentLang === 'zh' ? '请输入有效的兑换码' : 'Please enter a valid code');
+          return;
+        }
+
+        let redeemed = [];
+        try {
+          redeemed = JSON.parse(localStorage.getItem(this.REDEEMED_KEY) || '[]');
+        } catch (e) {}
+
+        if (redeemed.includes(code)) {
+          showToast(currentLang === 'zh' ? '⚠️ 该兑换码已被使用过' : '⚠️ This code has already been redeemed', true);
+          return;
+        }
+
+        if (this.PROMO_CODES[code]) {
+          const bonus = this.PROMO_CODES[code];
+          const state = this.getState();
+          state.balance += bonus;
+          redeemed.push(code);
+          try {
+            localStorage.setItem(this.REDEEMED_KEY, JSON.stringify(redeemed));
+          } catch (e) {}
+          this.saveState(state);
+          input.value = '';
+          showToast(currentLang === 'zh' ? `🎉 成功激活！获赠 +${bonus} 永久积分！` : `🎉 Success! +${bonus} permanent credits added!`);
+          trackAction('credits_redeemed', { code, bonus });
+        } else {
+          showToast(currentLang === 'zh' ? '❌ 无效的兑换码，请检查后重试' : '❌ Invalid code, please check and try again', true);
+        }
+      },
+
+      updateUI() {
+        const q = this.getAvailableQuota();
+        const badgeLabel = document.getElementById('credits-badge-label');
+        const badgeDot = document.getElementById('credits-badge-dot');
+        const modalDaily = document.getElementById('modal-daily-remaining');
+        const modalPerm = document.getElementById('modal-perm-balance');
+
+        if (badgeLabel) {
+          if (currentLang === 'zh') {
+            badgeLabel.textContent = q.dailyRemaining > 0 
+              ? `⚡ ${q.dailyRemaining} 免费额度` 
+              : (q.balance > 0 ? `💎 ${q.balance} 积分` : `⚡ 0 额度 (点击补充)`);
+          } else {
+            badgeLabel.textContent = q.dailyRemaining > 0 
+              ? `⚡ ${q.dailyRemaining} Free` 
+              : (q.balance > 0 ? `💎 ${q.balance} Pts` : `⚡ 0 Quota (Refill)`);
+          }
+        }
+
+        if (badgeDot) {
+          if (q.dailyRemaining > 3 || q.balance > 0) {
+            badgeDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+          } else if (q.dailyRemaining > 0) {
+            badgeDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+          } else {
+            badgeDot.className = 'w-2 h-2 rounded-full bg-rose-500 animate-ping';
+          }
+        }
+
+        if (modalDaily) modalDaily.textContent = q.dailyRemaining;
+        if (modalPerm) modalPerm.textContent = q.balance;
+      },
+
+      openModal() {
+        const modal = document.getElementById('credits-modal');
+        if (modal) {
+          this.updateUI();
+          modal.classList.remove('hidden');
+        }
+      },
+
+      closeModal() {
+        const modal = document.getElementById('credits-modal');
+        if (modal) modal.classList.add('hidden');
+      }
+    };
+
+    function aiMagicPolish() {
+      if (!PaceBowlCredits.consume(2, 'ai_magic_polish', 'AI Prompt Polish')) {
+        return;
+      }
+
+      const subjectInput = document.getElementById('input-subject');
+      let subject = subjectInput.value.trim() || 'A majestic high-tech cybernetic robotic tiger resting in an overgrown ancient bamboo forest';
+      
+      const camera = document.getElementById('opt-camera').value || 'shot on 85mm f/1.4 lens, shallow depth of field';
+      const lighting = document.getElementById('opt-lighting').value || 'golden hour warm sunlight casting long dramatic shadows';
+      const env = document.getElementById('opt-environment').value || 'surrounded by lush moss-covered ancient forest with morning dew';
+      const style = document.getElementById('opt-style').value || 'award-winning photorealistic editorial photograph';
+      const texture = document.getElementById('opt-texture')?.value || 'intricate skin pores, fine facial micro-details, and authentic photorealistic texture';
+
+      let polished = "";
+
+      if (currentModel === 'flux') {
+        const cleanStyle = style.replace(/^award-winning\s+/i, '');
+        const cleanEnv = env.replace(/^surrounded by\s+/i, '');
+        const sentences = [
+          `An award-winning, state-of-the-art ${cleanStyle} depicting ${subject}.`,
+          `The atmospheric scene unfolds in ${cleanEnv}, captured with exquisite natural presence.`,
+          `Illuminated by ${lighting}, where nuanced light wraps around contours and highlights subtle specular gradients.`,
+          `Shot with precision ${camera}, revealing delicate subsurface scattering, authentic micro-textures, tactile surfaces, and rich optical depth with zero artificial rendering sheen.`
+        ];
+        polished = sentences.join(" ");
+      } else {
+        polished = `(${subject}:1.25), ${style}, ${camera}, ${lighting}, ${env}, ${texture}, atmospheric depth, award-winning photography, photorealistic masterpiece, sharp focus, 8k resolution, Hasselblad medium format capture`;
+      }
+
+      const outputEl = document.getElementById('prompt-output');
+      outputEl.value = polished;
+
+      // Word count
+      const words = polished.split(/\s+/).filter(Boolean).length;
+      document.getElementById('token-counter').textContent = `~${words} words`;
+
+      // Highlight pulse effect on textarea
+      outputEl.classList.add('ring-2', 'ring-purple-500');
+      setTimeout(() => outputEl.classList.remove('ring-2', 'ring-purple-500'), 1500);
+
+      showToast(currentLang === 'zh' ? '🪄 AI 提示词深度扩写完成！(-2 额度)' : '🪄 AI Prompt Polished! (-2 Credits)');
+      trackAction('ai_magic_polish_completed', { model: currentModel });
     }
 
     function trackAction(name, meta) {
@@ -1611,6 +1996,9 @@
     }
 
     function copyClipNode() {
+      if (!PaceBowlCredits.consume(1, 'copy_clip_node', 'Copy ComfyUI Node')) {
+        return;
+      }
       const promptText = document.getElementById('prompt-output').value.trim();
 
       const comfyClipPayload = {
@@ -1661,6 +2049,9 @@
     }
 
     function downloadWorkflowJson() {
+      if (!PaceBowlCredits.consume(2, 'download_workflow', 'Download Workflow JSON')) {
+        return;
+      }
       const promptText = document.getElementById('prompt-output').value.trim();
       const negText = document.getElementById('negative-output')?.value.trim() || "ugly, deformed, disfigured, poor anatomy, bad hands, missing fingers, extra limbs, low quality, blurry, watermark, signature";
       const w = parseInt(document.getElementById('input-width').value) || 1024;
@@ -2146,6 +2537,7 @@
       });
       initCalculator();
       updateGpuCalculator();
+      if (typeof PaceBowlCredits !== 'undefined') PaceBowlCredits.updateUI();
     }
 
     function applyLanguage(lang, persist) {
@@ -2225,6 +2617,7 @@
       const theme = getSharedTheme();
       applyTheme(theme === 'dark', false);
       applyLanguage(getSharedLang(), false);
+      if (typeof PaceBowlCredits !== 'undefined') PaceBowlCredits.updateUI();
       updateGpuCalculator();
       randomSubject();
     });
