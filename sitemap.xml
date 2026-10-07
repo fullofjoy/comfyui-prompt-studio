@@ -2,43 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://comfy.pacebowl.com/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://comfy.pacebowl.com/blog/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide.html</loc>
-    <lastmod>2026-10-03</lastmod>
+    <loc>https://comfy.pacebowl.com/blog/comfyui-empty-latent-resolution-guide</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://comfy.pacebowl.com/blog/flux-prompting-guide-t5-natural-language.html</loc>
-    <lastmod>2026-10-03</lastmod>
+    <loc>https://comfy.pacebowl.com/blog/flux-prompting-guide-t5-natural-language</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://comfy.pacebowl.com/blog/how-to-generate-comfyui-prompts.html</loc>
-    <lastmod>2026-10-03</lastmod>
+    <loc>https://comfy.pacebowl.com/blog/how-to-generate-comfyui-prompts</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://comfy.pacebowl.com/blog/flux-schnell-vs-dev-comfyui-vram-guide.html</loc>
-    <lastmod>2026-10-06</lastmod>
+    <loc>https://comfy.pacebowl.com/blog/flux-schnell-vs-dev-comfyui-vram-guide</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://comfy.pacebowl.com/blog/comfyui-best-negative-prompts-sdxl-guide.html</loc>
-    <lastmod>2026-10-06</lastmod>
+    <loc>https://comfy.pacebowl.com/blog/comfyui-best-negative-prompts-sdxl-guide</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
